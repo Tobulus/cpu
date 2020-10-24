@@ -1,3 +1,7 @@
+`include "ops.vh"
+`include "mem_acc.vh"
+`include "cmp_res.vh"
+
 module alu(clk,
            enable,
            opcode,
@@ -22,38 +26,12 @@ module alu(clk,
     reg[15:0] pc, rA, rB, out;
     reg[7:0] immediate;
 
-    // opcodes
-    localparam ADD    = 4'b0000;
-    localparam SUB    = 4'b0001;
-    localparam OR     = 4'b0010;
-    localparam AND    = 4'b0011;
-    localparam XOR    = 4'b0100;
-    localparam NOT    = 4'b0101;
-    localparam READ   = 4'b0110;
-    localparam WRITE  = 4'b0111;
-    localparam LOAD   = 4'b1000;
-    localparam CMP    = 4'b1001;
-    localparam SHIFTL = 4'b1010;
-    localparam SHIFTR = 4'b1011;
-    localparam JMP    = 4'b1100;
-    localparam JMPC   = 4'b1101;
-
     // opcode modes - the mode depends on the opcode
     localparam OPCODE_MODE_SIGNED = 1'b0;
     localparam OPCODE_MODE_UNSIGNED = 1'b1;
 
     localparam OPCODE_MODE_HI = 1'b0;
     localparam OPCODE_MODE_LO = 1'b1;
-
-    // memory modes
-    localparam MEM_NOP   = 2'b00;
-    localparam MEM_READ  = 2'b01;
-    localparam MEM_WRITE = 2'b10;
-
-    // compare results
-    localparam CMP_EQ = 0;
-    localparam CMP_RA_GT = -1;
-    localparam CMP_RB_GT = 1;  
 
     always @(posedge clk)
     begin: ALU
