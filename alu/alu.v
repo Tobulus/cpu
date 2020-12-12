@@ -30,8 +30,8 @@ reg[7:0] I_immediate;
 localparam OPCODE_MODE_SIGNED = 1'b0;
 localparam OPCODE_MODE_UNSIGNED = 1'b1;
 
-localparam OPCODE_MODE_HI = 1'b0;
-localparam OPCODE_MODE_LO = 1'b1;
+localparam OPCODE_MODE_HI = 1'b1;
+localparam OPCODE_MODE_LO = 1'b0;
 
 always @(posedge I_clk)
 begin: ALU

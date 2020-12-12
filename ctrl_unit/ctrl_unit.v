@@ -83,7 +83,7 @@ begin: CTRL_UNIT
             if (I_instruction[15:12] == WRITE || I_data_ready == 1)
             begin
                 mem_wait <= 0;
-                O_state <= 6'b100000;
+                O_state <= 6'b000001;
             end
         end
     end

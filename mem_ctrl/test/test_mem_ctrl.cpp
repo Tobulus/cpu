@@ -47,7 +47,6 @@ int main(int argc, char** argv, char** env) {
    mem_ctrl->MEM_data_ready = 1;
    mem_ctrl->eval();
 
-   CHECK(mem_ctrl->O_data_ready, 1, "Data should be ready");
    CHECK(mem_ctrl->MEM_exec, 0, "MEM_exec should be 1");
    CHECK(mem_ctrl->O_ready, 1, "Should be ready");
    

@@ -47,11 +47,11 @@ begin: MEM_CTRL
         MEM_exec <= 1;
         if (I_write == 1) 
         begin
-            state <= 1;
+            state <= 2;
         end
         else
         begin
-            state <= 2;
+            state <= 1;
         end
     end
     else if (state == 1)
