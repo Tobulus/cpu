@@ -1,31 +1,31 @@
-module register(clk, 
-    enable,
-    rD_select,
-    rA_select,
-    rB_select,
-    rA_out,
-    rB_out,
-    rD_in,
-rD_write);
+module register(I_clk, 
+    I_enable,
+    I_rD_select,
+    I_rA_select,
+    I_rB_select,
+    O_rA_out,
+    O_rB_out,
+    I_rD_in,
+I_rD_write);
 
-input clk, enable, rD_select, rA_select, rB_select, rD_in, rD_write;
-output rA_out, rB_out;
+input I_clk, I_enable, I_rD_select, I_rA_select, I_rB_select, I_rD_in, I_rD_write;
+output O_rA_out, O_rB_out;
 
-wire clk, enable, rD_write;
-reg[2:0] rA_select, rB_select, rD_select;
-reg[15:0] rD_in, rA_out, rB_out;
+wire I_clk, I_enable, I_rD_write;
+reg[2:0] I_rA_select, I_rB_select, I_rD_select;
+reg[15:0] I_rD_in, O_rA_out, O_rB_out;
 
 reg[15:0] registers[0:7];
 
-always @(posedge clk)
+always @(posedge I_clk)
 begin: register
-    if (enable == 1)
+    if (I_enable == 1)
     begin
-        rA_out <= registers[rA_select];
-        rB_out <= registers[rB_select];
-        if (rD_write == 1)
+        O_rA_out <= registers[I_rA_select];
+        O_rB_out <= registers[I_rB_select];
+        if (I_rD_write == 1)
         begin
-            registers[rD_select] <= rD_in;
+            registers[I_rD_select] <= I_rD_in;
         end
     end
 end

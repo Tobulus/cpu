@@ -12,7 +12,7 @@ O_execute);
 input clk, I_instruction, I_mem_ready, I_data_ready, reset;
 output state, O_execute;
 
-reg[16:0] I_instruction;
+reg[15:0] I_instruction;
 reg[5:0] state;
 reg O_execute;
 

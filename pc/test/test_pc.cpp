@@ -4,30 +4,30 @@
 #include "verilated_vcd_c.h"
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() pc->clk = 0;pc->eval();
+#define NOP_CYCLE() pc->I_clk = 0;pc->eval();
 
 int main(int argc, char** argv, char** env) {
    Verilated::commandArgs(argc, argv);
    Vpc* pc = new Vpc;
    
-   pc->enable = 1;
+   pc->I_enable = 1;
    
-   pc->clk = 1;
-   pc->in = 1;
-   pc->write = 1;
+   pc->I_clk = 1;
+   pc->I_in = 1;
+   pc->I_write = 1;
 
    pc->eval();
-   CHECK(pc->out, 1, "out should be 1, but is %d", pc->out);
+   CHECK(pc->O_out, 1, "O_out should be 1, but is %d", pc->O_out);
    NOP_CYCLE();
 
    int i;
    for (i = 2; i < 50; i++) {
-       pc->clk = 1;
-       pc->write = 0;
+       pc->I_clk = 1;
+       pc->I_write = 0;
        
        pc->eval();
        
-       CHECK(pc->out, i, "out should be %d, but is %d", i, pc->out);
+       CHECK(pc->O_out, i, "O_out should be %d, but is %d", i, pc->O_out);
        NOP_CYCLE();
    }
 

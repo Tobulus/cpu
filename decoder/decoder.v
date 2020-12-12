@@ -1,30 +1,31 @@
-module decoder(clk, 
-    enable,
-    instr,
-    op,
-    rD_select,
-    rA_select,
-    rB_select,
-immediate);
+module decoder(I_clk, 
+    I_enable,
+    I_instruction,
+    O_opcode,
+    O_rD_select,
+    O_rA_select,
+    O_rB_select,
+O_immediate);
 
-input clk, enable, instr;
-output op, rD_select, rA_select, rB_select, immediate;
+/* verilator lint_off UNUSED */
+input I_clk, I_enable, I_instruction;
+output O_opcode, O_rD_select, O_rA_select, O_rB_select, O_immediate;
 
-wire clk, enable;
-reg[15:0] instr;
-reg[3:0] op;
-reg[2:0] rD_select, rA_select, rB_select;
-reg[7:0] immediate;
+wire I_clk, I_enable;
+reg[15:0] I_instruction;
+reg[3:0] O_opcode;
+reg[2:0] O_rD_select, O_rA_select, O_rB_select;
+reg[7:0] O_immediate;
 
-always @(posedge clk)
+always @(posedge I_clk)
 begin: decoder
-    if (enable == 1)
+    if (I_enable == 1)
     begin
-        op <= instr[15:12];
-        rD_select <= instr[11:9];
-        rA_select <= instr[7:5];
-        rB_select <= instr[4:2];
-        immediate <= instr[7:0];
+        O_opcode <= I_instruction[15:12];
+        O_rD_select <= I_instruction[11:9];
+        O_rA_select <= I_instruction[7:5];
+        O_rB_select <= I_instruction[4:2];
+        O_immediate <= I_instruction[7:0];
     end
 end
 endmodule

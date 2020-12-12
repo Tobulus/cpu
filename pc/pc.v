@@ -1,25 +1,25 @@
-module pc(clk,
-    enable,
-    in,
-    write,
-out);
+module pc(I_clk,
+    I_enable,
+    I_in,
+    I_write,
+O_out);
 
-input clk, enable, write, in;
-output out;
+input I_clk, I_enable, I_write, I_in;
+output O_out;
 
-wire clk, enable, write;
-reg[15:0] in, out;
+wire I_clk, I_enable, I_write;
+reg[15:0] I_in, O_out;
 
-always @(posedge clk)
+always @(posedge I_clk)
 begin: PC
-    if (enable == 1)
+    if (I_enable == 1)
     begin
-        if (write == 1)
+        if (I_write == 1)
         begin
-            out <= in;
+            O_out <= I_in;
         end
         else begin
-            out <= out + 1;
+            O_out <= O_out + 1;
         end
     end
 end

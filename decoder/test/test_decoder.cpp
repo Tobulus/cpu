@@ -4,23 +4,23 @@
 #include "verilated_vcd_c.h"
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() decoder->clk = 0;decoder->eval();
+#define NOP_CYCLE() decoder->I_clk = 0;decoder->eval();
 
 int main(int argc, char** argv, char** env) {
    Verilated::commandArgs(argc, argv);
    Vdecoder* decoder = new Vdecoder;
    
-   decoder->enable = 1;
+   decoder->I_enable = 1;
    
-   decoder->clk = 1;
-   decoder->instr = (1 << 12) | (1 << 10) | (1 << 7) | (1 << 2);
+   decoder->I_clk = 1;
+   decoder->I_instruction = (1 << 12) | (1 << 10) | (1 << 7) | (1 << 2);
 
    decoder->eval();
-   CHECK(decoder->op, 1, "op should be 1, but is %d", decoder->op);
-   CHECK(decoder->rA_select, 4, "rA_select should be 4, but is %d", decoder->rA_select);
-   CHECK(decoder->rB_select, 1, "rB_select should be 1, but is %d", decoder->rB_select);
-   CHECK(decoder->rD_select, 2, "rD_select should be 2, but is %d", decoder->rD_select);
-//   CHECK(decoder->immediate, 0, "immediate should be 1, but is %d", decoder->immediate);
+   CHECK(decoder->O_opcode, 1, "O_opcode should be 1, but is %d", decoder->O_opcode);
+   CHECK(decoder->O_rA_select, 4, "O_rA_select should be 4, but is %d", decoder->O_rA_select);
+   CHECK(decoder->O_rB_select, 1, "O_rB_select should be 1, but is %d", decoder->O_rB_select);
+   CHECK(decoder->O_rD_select, 2, "O_rD_select should be 2, but is %d", decoder->O_rD_select);
+//   CHECK(decoder->O_immediate, 0, "O_immediate should be 1, but is %d", decoder->O_immediate);
 
    NOP_CYCLE();
 

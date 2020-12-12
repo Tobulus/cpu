@@ -2,29 +2,29 @@
 `include "mem_acc.vh"
 `include "cmp_res.vh"
 
-module alu(clk,
-    enable,
-    opcode,
-    opcode_mode,
-    immediate,
-    pc,
-    rA,
-    rB,
-    out,
-    write_rD,
-    write_pc,
-memory_mode);
+module alu(I_clk,
+    I_enable,
+    I_opcode,
+    I_opcode_mode,
+    I_immediate,
+    I_pc,
+    I_rA,
+    I_rB,
+    O_out,
+    O_write_rD,
+    O_write_pc,
+O_memory_mode);
 
-input clk, enable, opcode, opcode_mode, immediate, rA, rB, pc;
+input I_clk, I_enable, I_opcode, I_opcode_mode, I_immediate, I_rA, I_rB, I_pc;
 
-output out, write_pc, write_rD, memory_mode;
+output O_out, O_write_pc, O_write_rD, O_memory_mode;
 
 // input/output types
-wire clk, enable, write_pc, write_rD, opcode_mode;
-reg[3:0] opcode;
-reg[1:0] memory_mode;
-reg[15:0] pc, rA, rB, out;
-reg[7:0] immediate;
+wire I_clk, I_enable, O_write_pc, O_write_rD, I_opcode_mode;
+reg[3:0] I_opcode;
+reg[1:0] O_memory_mode;
+reg[15:0] I_pc, I_rA, I_rB, O_out;
+reg[7:0] I_immediate;
 
 // opcode modes - the mode depends on the opcode
 localparam OPCODE_MODE_SIGNED = 1'b0;
@@ -33,177 +33,177 @@ localparam OPCODE_MODE_UNSIGNED = 1'b1;
 localparam OPCODE_MODE_HI = 1'b0;
 localparam OPCODE_MODE_LO = 1'b1;
 
-always @(posedge clk)
+always @(posedge I_clk)
 begin: ALU
-    if (enable == 1)
+    if (I_enable == 1)
     begin
-        if (opcode == ADD)
+        if (I_opcode == ADD)
         begin
-            if (opcode_mode == OPCODE_MODE_SIGNED)
+            if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
-                out <= $signed(rA) + $signed(rB);
+                O_out <= $signed(I_rA) + $signed(I_rB);
             end
             else begin
-                out <= $unsigned(rA) + $unsigned(rB);
+                O_out <= $unsigned(I_rA) + $unsigned(I_rB);
             end
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == SUB)
+        else if (I_opcode == SUB)
         begin
-            if (opcode_mode == OPCODE_MODE_SIGNED)
+            if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
-                out <= $signed(rA) - $signed(rB);
+                O_out <= $signed(I_rA) - $signed(I_rB);
             end
             else begin
-                out <= $unsigned(rA) - $unsigned(rB);
+                O_out <= $unsigned(I_rA) - $unsigned(I_rB);
             end
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == OR)
+        else if (I_opcode == OR)
         begin
-            out <= rA | rB;
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_out <= I_rA | I_rB;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == AND)
+        else if (I_opcode == AND)
         begin
-            out <= rA & rB;
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_out <= I_rA & I_rB;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == XOR)
+        else if (I_opcode == XOR)
         begin
-            out <= rA ^ rB;
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_out <= I_rA ^ I_rB;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == NOT)
+        else if (I_opcode == NOT)
         begin
-            out <= ~rA;
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_out <= ~I_rA;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == READ)
+        else if (I_opcode == READ)
         begin
-            out <= rA;
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_READ;
+            O_out <= I_rA;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_READ;
         end
-        else if (opcode == WRITE)
+        else if (I_opcode == WRITE)
         begin
-            out <= rA;
-            write_pc <= 0;
-            write_rD <= 0;
-            memory_mode <= MEM_WRITE;
+            O_out <= I_rA;
+            O_write_pc <= 0;
+            O_write_rD <= 0;
+            O_memory_mode <= MEM_WRITE;
         end
-        else if (opcode == LOAD)
+        else if (I_opcode == LOAD)
         begin
-            if (opcode_mode == OPCODE_MODE_HI)
+            if (I_opcode_mode == OPCODE_MODE_HI)
             begin
-                out[15:8] <= immediate;
-                out[7:0] <= 0;
+                O_out[15:8] <= I_immediate;
+                O_out[7:0] <= 0;
             end
             else begin
-                out[15:8] <= 0;
-                out[7:0] <= immediate;
+                O_out[15:8] <= 0;
+                O_out[7:0] <= I_immediate;
             end
-            write_pc <= 0;
-            write_rD <= 1;
-            memory_mode <= MEM_NOP;
+            O_write_pc <= 0;
+            O_write_rD <= 1;
+            O_memory_mode <= MEM_NOP;
         end
-        else if (opcode == CMP)
+        else if (I_opcode == CMP)
         begin
-            if (opcode_mode == OPCODE_MODE_SIGNED)
+            if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
-                if ($signed(rA) < $signed(rB))
+                if ($signed(I_rA) < $signed(I_rB))
                 begin
-                    out <= CMP_RB_GT;
+                    O_out <= CMP_RB_GT;
                 end
-                else if ($signed(rA) < $signed(rB))
+                else if ($signed(I_rA) < $signed(I_rB))
                 begin
-                    out <= CMP_RA_GT;
+                    O_out <= CMP_RA_GT;
                 end
                 else
                 begin
-                    out <= CMP_EQ;
+                    O_out <= CMP_EQ;
                 end
             end
             else
-            if ($unsigned(rA) < $unsigned(rB))
+            if ($unsigned(I_rA) < $unsigned(I_rB))
             begin
-                out <= CMP_RB_GT;
+                O_out <= CMP_RB_GT;
             end
-            else if ($unsigned(rA) < $unsigned(rB))
+            else if ($unsigned(I_rA) < $unsigned(I_rB))
             begin
-                out <= CMP_RA_GT;
+                O_out <= CMP_RA_GT;
             end
             else
             begin
-                out <= CMP_EQ;
+                O_out <= CMP_EQ;
             end
         end
-        write_pc <= 0;
-        write_rD <= 1;
-        memory_mode <= MEM_NOP;
+        O_write_pc <= 0;
+        O_write_rD <= 1;
+        O_memory_mode <= MEM_NOP;
     end
-    else if (opcode == SHIFTL)
+    else if (I_opcode == SHIFTL)
     begin
-        out <= rA << 1;
-        write_pc <= 0;
-        write_rD <= 1;
-        memory_mode <= MEM_NOP;
+        O_out <= I_rA << 1;
+        O_write_pc <= 0;
+        O_write_rD <= 1;
+        O_memory_mode <= MEM_NOP;
     end
-    else if (opcode == SHIFTR)
+    else if (I_opcode == SHIFTR)
     begin
-        out <= rA >> 1;
-        write_pc <= 0;
-        write_rD <= 1;
-        memory_mode <= MEM_NOP;
+        O_out <= I_rA >> 1;
+        O_write_pc <= 0;
+        O_write_rD <= 1;
+        O_memory_mode <= MEM_NOP;
     end
-    else if (opcode == JMP)
+    else if (I_opcode == JMP)
     begin
-        if (opcode_mode == OPCODE_MODE_SIGNED) begin
+        if (I_opcode_mode == OPCODE_MODE_SIGNED) begin
             // sign extend two's complement
-            if (immediate[7] == 1'b1) begin
-                out <= $signed(pc) + $signed({{8{1'b1}}, immediate});
+            if (I_immediate[7] == 1'b1) begin
+                O_out <= $signed(I_pc) + $signed({{8{1'b1}}, I_immediate});
             end
             else begin
-                out <= $signed(pc) + $signed({{8{1'b0}}, immediate});
+                O_out <= $signed(I_pc) + $signed({{8{1'b0}}, I_immediate});
             end
         end
         else begin
-            out <= pc + {{8{1'b0}}, immediate};
+            O_out <= I_pc + {{8{1'b0}}, I_immediate};
         end
-        write_pc <= 1;
-        write_rD <= 0;
-        memory_mode <= MEM_NOP;
+        O_write_pc <= 1;
+        O_write_rD <= 0;
+        O_memory_mode <= MEM_NOP;
     end
-    else if (opcode == JMPC)
+    else if (I_opcode == JMPC)
     begin
-        if (opcode_mode == OPCODE_MODE_SIGNED) begin
+        if (I_opcode_mode == OPCODE_MODE_SIGNED) begin
             // sign extend two's complement
-            if (immediate[7] == 1'b1) begin
-                out <= $signed(pc) + $signed({{8{1'b1}}, immediate});
+            if (I_immediate[7] == 1'b1) begin
+                O_out <= $signed(I_pc) + $signed({{8{1'b1}}, I_immediate});
             end
             else begin
-                out <= $signed(pc) + $signed({{8{1'b0}}, immediate});
+                O_out <= $signed(I_pc) + $signed({{8{1'b0}}, I_immediate});
             end
         end
         else begin
-            out <= pc + {{8{1'b0}}, immediate};
+            O_out <= I_pc + {{8{1'b0}}, I_immediate};
         end
-        write_pc <= rA == rB;
-        write_rD <= 0; 
-        memory_mode <= MEM_NOP;
+        O_write_pc <= I_rA == I_rB;
+        O_write_rD <= 0; 
+        O_memory_mode <= MEM_NOP;
     end
 end
 endmodule
