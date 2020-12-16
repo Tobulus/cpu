@@ -1,4 +1,5 @@
 import re, sys
+from optparse import OptionParser
 
 LABEL   = "(\w+):"
 ADD     = "add r(\d), r(\d), r(\d)"
@@ -20,16 +21,22 @@ JMPRBGT = "jmprbgt r(\d), r(\d)"
 JMPRAZ  = "jmpraz r(\d), r(\d)"
 JMPRBZ  = "jmprbz r(\d), r(\d)"
 
-SHIFT_OPCODE = 2
+SHIFT_OPCODE = 12
 SHIFT_RD     = 9
 SHIFT_RA     = 5
 SHIFT_RB     = 2
 
+optparser = OptionParser()
+optparser.add_option("--ascii", action="store_true", dest="ascii")
+optparser.add_option("--input", action="store", type="string", dest="input_file")
+optparser.add_option("--output", action="store", type="string", dest="output_file")
+(options, args) = optparser.parse_args(sys.argv)
 
-with open(sys.argv[1]) as f:
+output = []
+
+with open(options.input_file) as f:
     pos = 0
     labels = {}
-    output = []
     lines = [line[:-1] for line in f.readlines()]
 
     for line in lines:
@@ -147,5 +154,11 @@ with open(sys.argv[1]) as f:
 
         pos += 2
 
-for op in output:
-    print(str(op) + '\n');
+if options.ascii:
+    with open(options.output_file, 'w') as f:
+        for op in output:
+            f.write(str(op) + '\n');
+else:
+    with open(options.output_file, 'wb') as f:
+        for op in output:
+            f.write(op.to_bytes(2, 'little'))
