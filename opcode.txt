@@ -1,7 +1,24 @@
 15|14|13|12|11|10|9|8|7|6|5|4|3|2|1|0|Name
-Opcode     |rD     |F|rA   |rB   |   |Add, Sub, And, Or, Xor
-Opcode     |       |F|rA   |rB   |   |Mem. R/W
-Opcode     |rD     |F|rA   |         |Not, Shift L/R
-Opcode     |rD     |F|               |Branch
-Opcode     |rD     |F|8-Bit Imm. Val.|Load
-Opcode     |       |F|8-Bit Imm. Val.|Branch
+ 0  0  0  0|rD     |0|rA   |rB   | |0| Add signed
+ 0  0  0  0|rD     |0|rA   |Immedi.|1| Add signed immediate
+ 0  0  0  0|rD     |1|rA   |rB   | |0| Add unsigned 
+ 0  0  0  0|rD     |1|rA   |Immedi.|1| Add unsigned immediate
+ 0  0  0  1|rD     |0|rA   |rB   |   | Sub signed
+ 0  0  0  1|rD     |0|rA   |Immedi.|1| Sub signed immediate
+ 0  0  0  1|rD     |1|rA   |rB   |   | Sub unsigned 
+ 0  0  0  1|rD     |1|rA   |Immedi.|1| Sub unsigned immediate 
+ 0  0  1  0|rD     |0|rA   |rB   |   | Or
+ 0  0  1  1|rD     |0|rA   |rB   |   | And
+ 0  1  0  0|rD     |0|rA   |rB   |   | Xor
+ 0  1  0  1|rD     |0|rA   |     |   | Not
+ 0  1  1  0|rD     |0|rA   |Immediate| Memory read
+ 0  1  1  1|Immedi |0|rA   |rB   |ate| Memory write
+ 1  0  0  0|rD     |0|Immediate      | Load low
+ 1  0  0  0|rD     |1|Immediate      | Load high
+ 1  0  0  1|rD     |0|rA   |rB   |   | Compare
+ 1  0  1  0|rD     |0|rA   |     |   | Shift Left
+ 1  0  1  1|rD     |0|rA   |     |   | Shift Right
+ 1  1  0  0|       |0|Immediate      | Branch immediate offset
+ 1  1  0  1|c  c  c|0|rA   |rB   |   | Branch compare
+ 1  1  0  1|c  c  c|1|rA   |Immediate| Branch compare immediate offset
+ 1  1  1  0|rD     |0|     |         | Save stack pointer

@@ -13,7 +13,7 @@ output MEM_exec, MEM_write, MEM_addr, MEM_data_out;
 
 reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
 
-wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, opcode_mode, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD;
+wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
 reg[1:0] memory_mode;
 reg[2:0] rD_select, rA_select, rB_select;
 reg[3:0] opcode;
@@ -25,12 +25,13 @@ reg[5:0] state;
 alu alu(.I_clk(I_clk), 
     .I_enable(alu_enable),
     .I_opcode(opcode),
-    .I_opcode_mode(opcode_mode),
+    .I_opcode_mode(mode),
     .I_immediate(immediate),
     .I_pc(pc_out),
-    .O_memory_mode(memory_mode),
     .I_rA(rA_out),
     .I_rB(rB_out),
+    .I_compare_code(rD_select),
+    .O_memory_mode(memory_mode),
     .O_out(alu_out),
     .O_write_rD(alu_write_rD),
 .O_write_pc(pc_write));
@@ -50,7 +51,8 @@ decoder decoder(.I_clk(I_clk),
     .O_rD_select(rD_select),
     .O_rA_select(rA_select),
     .O_rB_select(rB_select),
-.O_immediate(immediate));
+    .O_immediate(immediate),
+.O_mode(mode));
 
 mem_ctrl mem_ctrl(.I_clk(I_clk), 
     .I_exec(mem_execute),
@@ -87,7 +89,6 @@ pc pc(.I_clk(I_clk),
 always @(*)
 begin
     instruction = MEM_data_in;
-    opcode_mode = instruction[7];
     decoder_enable = state[1];
     register_enable = state[2] || state[5];
     alu_enable = state[3];

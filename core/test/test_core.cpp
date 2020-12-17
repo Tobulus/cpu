@@ -11,7 +11,6 @@ void dump_state(Vcore* core) {
     
     printf("----------------------------------\n");
     printf("mem_enable=%d\n", core->v__DOT__mem_enable);
-    printf("opcode_mode=%d\n", core->v__DOT__opcode_mode);
     printf("alu_write_rD=%d\n", core->v__DOT__alu_write_rD);
     printf("pc_write=%d\n", core->v__DOT__pc_write);
     printf("mem_ready=%d\n", core->v__DOT__mem_ready);
@@ -31,7 +30,6 @@ void dump_state(Vcore* core) {
     printf("rA_out=%d\n", core->v__DOT__rA_out);
     printf("rB_out=%d\n", core->v__DOT__rB_out);
     printf("alu_out=%d\n", core->v__DOT__alu_out);
-    printf("instruction=%d\n", core->v__DOT__instruction);
     printf("mem_addr=%d\n", core->v__DOT__mem_addr);
     printf("mem_ctrl_state[0]=%d\n", core->__Vtable1_v__DOT__mem_ctrl__DOT__state[0]);
     printf("mem_ctrl_state[1]=%d\n", core->__Vtable1_v__DOT__mem_ctrl__DOT__state[1]);

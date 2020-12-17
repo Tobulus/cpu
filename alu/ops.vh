@@ -14,4 +14,5 @@
     localparam SHIFTR = 4'b1011;
     localparam JMP    = 4'b1100;
     localparam JMPC   = 4'b1101;
+    localparam SPC    = 4'b1110;
 `endif
