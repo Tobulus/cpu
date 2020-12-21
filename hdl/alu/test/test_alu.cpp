@@ -1,353 +1,311 @@
 #include <stdlib.h>
 #include "Valu.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
+#include "testbench.h"
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() alu->I_clk = 0;alu->eval();
 
-void test_unsigned_add(Valu* alu) {
-   // addition
-   alu->I_opcode = 0;
-   // unsigned mode  
-   alu->I_opcode_mode = 1;
+class Alu_Test_Bench: public TESTBENCH<Valu> {
 
-   // two positive operands
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+    public:
 
-   alu->eval();
+        void test_unsigned_add() {
+            m_core->I_enable = 1;
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // addition
+            m_core->I_opcode = 0;
+            // unsigned mode  
+            m_core->I_opcode_mode = 1;
 
-   // first operand 0, second positive
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 5;
+            // two positive operands
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-   // first positive, second operand 0
-   alu->I_clk = 1;
-   alu->I_rA = 5;
-   alu->I_rB = 0;
+            // first operand 0, second positive
+            m_core->I_rA = 0;
+            m_core->I_rB = 5;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-   // first operand 0, second operand 0
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 0;
+            // first positive, second operand 0
+            m_core->I_rA = 5;
+            m_core->I_rB = 0;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 0, "out should be 0 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-void test_signed_add(Valu* alu) {
-   // addition
-   alu->I_opcode = 0;
-   // signed
-   alu->I_opcode_mode = 0;
+            // first operand 0, second operand 0
+            m_core->I_rA = 0;
+            m_core->I_rB = 0;
 
-   // unsigned operands
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+            this->tick();
 
-   alu->eval();
+            CHECK(m_core->O_out, 0, "out should be 0 but is %d", m_core->O_out);
+        }
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+        void test_signed_add() {
+            m_core->I_enable = 1;
 
-   // first operand signed, second unsigned
-   alu->I_clk = 1;
-   alu->I_rA = -3;
-   alu->I_rB = 2;
+            // addition
+            m_core->I_opcode = 0;
+            // signed
+            m_core->I_opcode_mode = 0;
 
-   alu->eval();
+            // unsigned operands
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            this->tick();
 
-   // first operand unsigned, second signed
-   alu->I_clk = 1;
-   alu->I_rA = 3;
-   alu->I_rB = -2;
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-   alu->eval();
+            // first operand signed, second unsigned
+            m_core->I_rA = -3;
+            m_core->I_rB = 2;
 
-   CHECK(alu->O_out, 1, "out should be 1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            this->tick();
 
-   // first operand signed, second 0
-   alu->I_clk = 1;
-   alu->I_rA = -1;
-   alu->I_rB = 0;
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-   alu->eval();
+            // first operand unsigned, second signed
+            m_core->I_rA = 3;
+            m_core->I_rB = -2;
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            this->tick();
 
-   // first operand 0, second signed
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = -1;
+            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
 
-   alu->eval();
+            // first operand signed, second 0
+            m_core->I_rA = -1;
+            m_core->I_rB = 0;
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            this->tick();
 
-   // first operand signed, second signed
-   alu->I_clk = 1;
-   alu->I_rA = -2;
-   alu->I_rB = -3;
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-   alu->eval();
+            // first operand 0, second signed
+            m_core->I_rA = 0;
+            m_core->I_rB = -1;
 
-   CHECK((signed short)alu->O_out, -5, "out should be -5 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            this->tick();
 
-void test_unsigned_sub(Valu* alu) {
-   // subtraction
-   alu->I_opcode = 1;
-   // unsigned mode  
-   alu->I_opcode_mode = 1;
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-   // two positive operands - negative result
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+            // first operand signed, second signed
+            m_core->I_rA = -2;
+            m_core->I_rB = -3;
 
-   alu->eval();
+            this->tick();
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
+        }
 
-   // two positive operands - positive result
-   alu->I_clk = 1;
-   alu->I_rA = 3;
-   alu->I_rB = 2;
+        void test_unsigned_sub() {
+            m_core->I_enable = 1;
 
-   alu->eval();
+            // subtraction
+            m_core->I_opcode = 1;
+            // unsigned mode  
+            m_core->I_opcode_mode = 1;
 
-   CHECK(alu->O_out, 1, "out should be 1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // two positive operands - negative result
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   // first operand 0, second positive
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 5;
+            this->tick();
 
-   alu->eval();
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-   CHECK((signed short)alu->O_out, -5, "out should be -5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // two positive operands - positive result
+            m_core->I_rA = 3;
+            m_core->I_rB = 2;
 
-   // first positive, second operand 0
-   alu->I_clk = 1;
-   alu->I_rA = 5;
-   alu->I_rB = 0;
+            this->tick();
 
-   alu->eval();
+            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // first operand 0, second positive
+            m_core->I_rA = 0;
+            m_core->I_rB = 5;
 
-   // first operand 0, second operand 0
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 0;
+            this->tick();
 
-   alu->eval();
+            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
 
-   CHECK(alu->O_out, 0, "out should be 0 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            // first positive, second operand 0
+            m_core->I_rA = 5;
+            m_core->I_rB = 0;
 
-void test_signed_sub(Valu* alu) {
-   // addition
-   alu->I_opcode = 1;
-   // signed
-   alu->I_opcode_mode = 0;
+            this->tick();
 
-   // unsigned operands - negative result
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-   alu->eval();
+            // first operand 0, second operand 0
+            m_core->I_rA = 0;
+            m_core->I_rB = 0;
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            this->tick();
 
-   // unsigned operands - positive result
-   alu->I_clk = 1;
-   alu->I_rA = 3;
-   alu->I_rB = 2;
+            CHECK(m_core->O_out, 0, "out should be 0 but is %d", m_core->O_out);
+        }
 
-   alu->eval();
+        void test_signed_sub() {
+            m_core->I_enable = 1;
 
-   CHECK(alu->O_out, 1, "out should be 1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // addition
+            m_core->I_opcode = 1;
+            // signed
+            m_core->I_opcode_mode = 0;
 
-   // first operand signed, second unsigned
-   alu->I_clk = 1;
-   alu->I_rA = -3;
-   alu->I_rB = 2;
+            // unsigned operands - negative result
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   alu->eval();
+            this->tick();
 
-   CHECK((signed short)alu->O_out, -5, "out should be -5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-   // first operand unsigned, second signed
-   alu->I_clk = 1;
-   alu->I_rA = 3;
-   alu->I_rB = -2;
+            // unsigned operands - positive result
+            m_core->I_rA = 3;
+            m_core->I_rB = 2;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 5, "out should be 5 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
 
-   // first operand signed, second 0
-   alu->I_clk = 1;
-   alu->I_rA = -1;
-   alu->I_rB = 0;
+            // first operand signed, second unsigned
+            m_core->I_rA = -3;
+            m_core->I_rB = 2;
 
-   alu->eval();
+            this->tick();
 
-   CHECK((signed short)alu->O_out, -1, "out should be -1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
 
-   // first operand 0, second signed
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = -1;
+            // first operand unsigned, second signed
+            m_core->I_rA = 3;
+            m_core->I_rB = -2;
 
-   alu->eval();
+            this->tick();
 
-   CHECK((signed short)alu->O_out, 1, "O_out should be 1 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
 
-   // first operand signed, second signed
-   alu->I_clk = 1;
-   alu->I_rA = -2;
-   alu->I_rB = -3;
+            // first operand signed, second 0
+            m_core->I_rA = -1;
+            m_core->I_rB = 0;
 
-   alu->eval();
+            this->tick();
 
-   CHECK((signed short)alu->O_out, 1, "O_out should be 1 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
 
-void test_or(Valu* alu) {
-   // OR
-   alu->I_opcode = 2;
+            // first operand 0, second signed
+            m_core->I_rA = 0;
+            m_core->I_rB = -1;
 
-   // unsigned operands
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+            this->tick();
 
-   alu->eval();
+            CHECK((signed short)m_core->O_out, 1, "O_out should be 1 but is %d", m_core->O_out);
 
-   CHECK(alu->O_out, (2|3), "O_out should be 3 but is %d", alu->O_out);
-   NOP_CYCLE();
+            // first operand signed, second signed
+            m_core->I_rA = -2;
+            m_core->I_rB = -3;
 
-   // 0 as operands
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 0;
+            this->tick();
 
-   alu->eval();
+            CHECK((signed short)m_core->O_out, 1, "O_out should be 1 but is %d", m_core->O_out);
+        }
 
-   CHECK(alu->O_out, 0, "O_out should be 0 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+        void test_or() {
+            m_core->I_enable = 1;
 
-void test_and(Valu* alu) {
-   // AND
-   alu->I_opcode = 3;
+            // OR
+            m_core->I_opcode = 2;
 
-   // unsigned operands - negative result
-   alu->I_clk = 1;
-   alu->I_rA = 2;
-   alu->I_rB = 3;
+            // unsigned operands
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, (2&3), "O_out should be 2 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, (2|3), "O_out should be 3 but is %d", m_core->O_out);
 
-   // unsigned operands - positive result
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 0;
+            // 0 as operands
+            m_core->I_rA = 0;
+            m_core->I_rB = 0;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 0, "O_out should be 0 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+        }
 
+        void test_and() {
+            m_core->I_enable = 1;
 
-void test_xor(Valu* alu) {
-   // XOR
-   alu->I_opcode = 4;
+            // AND
+            m_core->I_opcode = 3;
 
-   // unsigned operands - negative result
-   alu->I_clk = 1;
-   alu->I_rA = 1;
-   alu->I_rB = 2;
+            // unsigned operands - negative result
+            m_core->I_rA = 2;
+            m_core->I_rB = 3;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, (1^2), "O_out should be 3 but is %d", alu->O_out);
-   NOP_CYCLE();
+            CHECK(m_core->O_out, (2&3), "O_out should be 2 but is %d", m_core->O_out);
 
-   // unsigned operands - positive result
-   alu->I_clk = 1;
-   alu->I_rA = 0;
-   alu->I_rB = 0;
+            // unsigned operands - positive result
+            m_core->I_rA = 0;
+            m_core->I_rB = 0;
 
-   alu->eval();
+            this->tick();
 
-   CHECK(alu->O_out, 0, "O_out should be 0 but is %d", alu->O_out);
-   NOP_CYCLE();
-}
+            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+        }
 
+        void test_xor() {
+            m_core->I_enable = 1;
 
+            // XOR
+            m_core->I_opcode = 4;
+
+            // unsigned operands - negative result
+            m_core->I_rA = 1;
+            m_core->I_rB = 2;
+
+            this->tick();
+
+            CHECK(m_core->O_out, (1^2), "O_out should be 3 but is %d", m_core->O_out);
+
+            // unsigned operands - positive result
+            m_core->I_rA = 0;
+            m_core->I_rB = 0;
+
+            this->tick();
+
+            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+        }
+
+};
 
 int main(int argc, char** argv, char** env) {
-   Verilated::commandArgs(argc, argv);
-   Valu* alu = new Valu;
-   
-   alu->I_enable = 1;
+    Verilated::commandArgs(argc, argv);
+    Alu_Test_Bench *bench = new Alu_Test_Bench;
 
-   test_unsigned_add(alu);
-   test_signed_add(alu);
-   test_unsigned_sub(alu);
-   test_signed_sub(alu);
-   test_or(alu);
-   test_and(alu);
-   test_xor(alu);
+    bench->test_unsigned_add();
+    bench->test_signed_add();
+    bench->test_unsigned_sub();
+    bench->test_signed_sub();
+    bench->test_or();
+    bench->test_and();
+    bench->test_xor();
 
-   printf("Success!\n");
+    printf("Success!\n");
 
-   delete alu;
-   exit(0);
+    delete bench;
+    exit(0);
 }

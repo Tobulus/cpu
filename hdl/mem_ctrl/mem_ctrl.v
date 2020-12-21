@@ -1,25 +1,21 @@
-module mem_ctrl(I_clk, 
-    I_exec,
-    I_write,
-    I_addr, 
-    I_data,
-    O_data, 
-    O_data_ready,
-    O_ready,
-    MEM_ready,
-    MEM_exec,
-    MEM_write,
-    MEM_addr,
-    MEM_data_out,
-    MEM_data_in,
-MEM_data_ready);
-
-input I_clk, I_exec, I_write, I_addr, I_data, MEM_ready, MEM_data_in, MEM_data_ready;
-
-output O_ready, O_data_ready, O_data, MEM_exec, MEM_addr, MEM_data_out, MEM_write;
+module mem_ctrl(input I_clk,
+    input I_reset, 
+    input I_exec,
+    input I_write,
+    input I_addr, 
+    input I_data,
+    output O_data, 
+    output O_data_ready,
+    output O_ready,
+    input MEM_ready,
+    output MEM_exec,
+    output MEM_write,
+    output MEM_addr,
+    output MEM_data_out,
+    input MEM_data_in,
+input MEM_data_ready);
 
 reg[15:0] I_addr, I_data, O_data, MEM_data_in, MEM_data_out, MEM_addr;
-
 reg[1:0] state = 0;
 
 always @(*)
@@ -41,35 +37,37 @@ end
 
 always @(posedge I_clk)
 begin: MEM_CTRL
-    if (state == 0 && I_exec == 1 && MEM_ready == 1) 
-    begin
-        O_data_ready <= 0;
-        MEM_exec <= 1;
-        if (I_write == 1) 
+    if (I_reset == 0) begin
+        if (state == 0 && I_exec == 1 && MEM_ready == 1) 
         begin
-            state <= 2;
+            O_data_ready <= 0;
+            MEM_exec <= 1;
+            if (I_write == 1) 
+            begin
+                state <= 2;
+            end
+            else
+            begin
+                state <= 1;
+            end
         end
-        else
+        else if (state == 1)
         begin
-            state <= 1;
+            MEM_exec <= 0;
+            if (MEM_data_ready == 1)
+            begin
+                O_data_ready <= 1;
+                state <= 0;
+            end
         end
-    end
-    else if (state == 1)
-    begin
-        MEM_exec <= 0;
-        if (MEM_data_ready == 1)
+        else if (state == 2)
         begin
-            O_data_ready <= 1;
-            state <= 0;
-        end
-    end
-    else if (state == 2)
-    begin
-        MEM_exec <= 0;
-        O_data_ready <= 0;
-        if (MEM_ready == 1)
-        begin
-            state <= 0;
+            MEM_exec <= 0;
+            O_data_ready <= 0;
+            if (MEM_ready == 1)
+            begin
+                state <= 0;
+            end
         end
     end
 end

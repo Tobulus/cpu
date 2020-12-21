@@ -1,34 +1,49 @@
 #include <stdlib.h>
 #include "Vregister.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
+#include "testbench.h"
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() reg->I_clk = 0;reg->eval();
+
+class Register_Test_Bench: public TESTBENCH<Vregister> {
+
+    public:
+        void test_rw_registers() {
+            int i;
+
+            m_core->I_enable = 1;
+            
+            this->reset();
+
+            for (i = 0; i < 8; i++) {
+                m_core->I_rD_write = 1;
+                m_core->I_rD_select = i;
+                m_core->I_rD_in = i;
+
+                this->tick();
+
+                m_core->I_rD_write = 0;
+                m_core->I_rA_select = i;
+                m_core->I_rB_select = i;
+
+                this->tick();
+
+                CHECK(m_core->O_rA_out, i,"O_rA_out should be %d but is %d\n", i, m_core->O_rA_out);
+                CHECK(m_core->O_rB_out, i,"O_rB_out should be %d but is %d\n", i, m_core->O_rB_out);
+            }
+        }
+
+};
 
 int main(int argc, char** argv, char** env) {
-   Verilated::commandArgs(argc, argv);
-   Vregister* reg = new Vregister;
-   
-   reg->I_enable = 1;
+    Verilated::commandArgs(argc, argv);
+    Register_Test_Bench *bench = new Register_Test_Bench;
+    bench->opentrace("trace.vcd");
 
-   reg->I_clk = 1;
-   reg->I_rD_write = 1;
-   reg->I_rD_select = 2;
-   reg->I_rD_in = 6;
-   
-   reg->eval();
-   NOP_CYCLE()
-   
-   reg->I_clk = 1;
-   reg->I_rD_write = 0;
-   reg->I_rA_select = 2;
+    bench->test_rw_registers();
 
-   reg->eval();
-   CHECK(reg->O_rA_out, 6, "data_out should be 6 but is %d", reg->O_rA_out);
+    printf("Success!\n");
 
-   printf("Success!\n");
-
-   delete reg;
-   exit(0);
+    delete bench;
+    exit(0);
 }

@@ -1,5 +1,5 @@
 set -x
 rm -rf ./obj_dir
-verilator -Wall --cc *.v --exe test/test_*.cpp
+verilator -Wall --trace --cc *.v --exe test/test_*.cpp -CFLAGS -I../../test
 cd obj_dir
 make -f Vpc.mk

@@ -2,26 +2,21 @@
 `include "mem_acc.vh"
 `include "cmp_res.vh"
 
-module alu(I_clk,
-    I_enable,
-    I_opcode,
-    I_opcode_mode,
-    I_immediate,
-    I_pc,
-    I_rA,
-    I_rB,
-    I_compare_code,
-    O_out,
-    O_write_rD,
-    O_write_pc,
-O_memory_mode);
+module alu(input I_clk,
+    input I_reset,
+    input I_enable,
+    input I_opcode,
+    input I_opcode_mode,
+    input I_immediate,
+    input I_pc,
+    input I_rA,
+    input I_rB,
+    input I_compare_code,
+    output O_out,
+    output O_write_rD,
+    output O_write_pc,
+output O_memory_mode);
 
-input I_clk, I_enable, I_opcode, I_opcode_mode, I_immediate, I_rA, I_rB, I_pc, I_compare_code;
-
-output O_out, O_write_pc, O_write_rD, O_memory_mode;
-
-// input/output types
-wire I_clk, I_enable, O_write_pc, O_write_rD, I_opcode_mode;
 reg[3:0] I_opcode;
 reg[2:0] I_compare_code;
 reg[1:0] O_memory_mode;
@@ -37,7 +32,7 @@ localparam OPCODE_MODE_LO = 1'b0;
 
 always @(posedge I_clk)
 begin: ALU
-    if (I_enable == 1)
+    if (I_enable == 1 && I_reset == 0)
     begin
         if (I_opcode == ADD)
         begin

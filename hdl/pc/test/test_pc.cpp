@@ -1,38 +1,54 @@
 #include <stdlib.h>
 #include "Vpc.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
+#include "testbench.h"
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() pc->I_clk = 0;pc->eval();
+
+class PC_Test_Bench: public TESTBENCH<Vpc> {
+
+    public:
+
+        void test_write_counter(uint8_t counter) {
+            m_core->I_in = counter;
+            m_core->I_write = 1;
+            m_core->I_enable = 1;
+
+            this->tick();
+
+            CHECK(m_core->O_out, counter, "O_out should be %d, but is %d\n", counter, m_core->O_out);
+        }
+
+        void test_inc_counter(uint8_t expected) {
+            m_core->I_write = 0;
+            m_core->I_enable = 1;
+
+            this->tick();
+
+            CHECK(m_core->O_out, expected, "O_out should be %d, but is %d\n", expected, m_core->O_out);
+        }
+
+};
 
 int main(int argc, char** argv, char** env) {
-   Verilated::commandArgs(argc, argv);
-   Vpc* pc = new Vpc;
-   
-   pc->I_enable = 1;
-   
-   pc->I_clk = 1;
-   pc->I_in = 1;
-   pc->I_write = 1;
+    Verilated::commandArgs(argc, argv);
+    PC_Test_Bench *bench = new PC_Test_Bench();
+    int i;
 
-   pc->eval();
-   CHECK(pc->O_out, 1, "O_out should be 1, but is %d", pc->O_out);
-   NOP_CYCLE();
+    bench->opentrace("trace.vcd");
 
-   int i;
-   for (i = 2; i < 50; i++) {
-       pc->I_clk = 1;
-       pc->I_write = 0;
-       
-       pc->eval();
-       
-       CHECK(pc->O_out, i, "O_out should be %d, but is %d", i, pc->O_out);
-       NOP_CYCLE();
-   }
+    for (i = 0; i < 100; i++) {
+        bench->test_write_counter(i);
+    }
 
-   printf("Success!\n");
+    bench->test_write_counter(0);
 
-   delete pc;
-   exit(0);
+    for (i = 1; i < 100; i++) {
+        bench->test_inc_counter(i);
+    }
+
+    printf("Success!\n");
+
+    delete bench;
+    exit(0);
 }

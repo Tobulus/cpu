@@ -1,19 +1,15 @@
-module core(I_clk, 
-    I_reset,
-    MEM_ready,
-    MEM_exec, 
-    MEM_write, 
-    MEM_addr, 
-    MEM_data_in, 
-    MEM_data_out, 
-MEM_data_ready);
-
-input I_clk, I_reset, MEM_ready, MEM_data_in, MEM_data_ready;
-output MEM_exec, MEM_write, MEM_addr, MEM_data_out;
-
-reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
+module core(input I_clk, 
+    input I_reset,
+    input MEM_ready,
+    input MEM_data_in, 
+input MEM_data_ready,
+    output MEM_exec, 
+    output MEM_write, 
+    output MEM_addr, 
+    output MEM_data_out);
 
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
+reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
 reg[1:0] memory_mode;
 reg[2:0] rD_select, rA_select, rB_select;
 reg[3:0] opcode;
@@ -22,7 +18,8 @@ reg[15:0] pc_out, pc_in, rA_out, rB_out, alu_out, register_in, instruction, mem_
 /* verilator lint_off UNUSED */
 reg[5:0] state;
 
-alu alu(.I_clk(I_clk), 
+alu alu(.I_clk(I_clk),
+    .I_reset(I_reset), 
     .I_enable(alu_enable),
     .I_opcode(opcode),
     .I_opcode_mode(mode),
@@ -37,7 +34,7 @@ alu alu(.I_clk(I_clk),
 .O_write_pc(pc_write));
 
 ctrl_unit ctrl_unit(.I_clk(I_clk),
-    .I_reset(I_reset),
+    .I_reset(I_reset), 
     .I_instruction(instruction),
     .I_mem_ready(mem_ready),
     .I_data_ready(mem_data_ready),
@@ -45,6 +42,7 @@ ctrl_unit ctrl_unit(.I_clk(I_clk),
 .O_execute(mem_execute));
 
 decoder decoder(.I_clk(I_clk), 
+    .I_reset(I_reset), 
     .I_enable(decoder_enable),
     .I_instruction(instruction),
     .O_opcode(opcode),
@@ -55,6 +53,7 @@ decoder decoder(.I_clk(I_clk),
 .O_mode(mode));
 
 mem_ctrl mem_ctrl(.I_clk(I_clk), 
+    .I_reset(I_reset), 
     .I_exec(mem_execute),
     .I_write(mem_write),
     .I_addr(mem_addr),
@@ -71,6 +70,7 @@ mem_ctrl mem_ctrl(.I_clk(I_clk),
 .MEM_data_ready(MEM_data_ready));
 
 register register(.I_clk(I_clk), 
+    .I_reset(I_reset), 
     .I_enable(register_enable),
     .I_rD_write(write_rD),
     .I_rD_select(rD_select),
@@ -81,6 +81,7 @@ register register(.I_clk(I_clk),
 .I_rD_in(register_in));
 
 pc pc(.I_clk(I_clk),
+    .I_reset(I_reset), 
     .I_in(pc_in),
     .I_enable(pc_enable),
     .I_write(pc_write),
