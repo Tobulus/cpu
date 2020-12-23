@@ -333,13 +333,13 @@ int main(int argc, char** argv, char** env) {
     Alu_Test_Bench *bench = new Alu_Test_Bench;
     bench->opentrace("trace.vcd");
 
-    /*bench->test_unsigned_add();
+    bench->test_unsigned_add();
     bench->test_signed_add();
     bench->test_unsigned_sub();
     bench->test_signed_sub();
     bench->test_or();
     bench->test_and();
-    bench->test_xor();*/
+    bench->test_xor();
     bench->test_cmp();
 
     printf("Success!\n");
