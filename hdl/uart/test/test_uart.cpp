@@ -2,52 +2,56 @@
 #include "Vuart_rx.h"
 #include "Vuart_tx.h"
 #include "verilated.h"
-#include "verilated_vcd_c.h"
+#include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-#define NOP_CYCLE() tx->I_clk=0;rx->I_clk=0;tx->eval();rx->eval();
+class Uart_Test_Bench: public TESTBENCH<Vuart_rx> {
+    public:
+
+        void dump_state(Vuart_tx *tx) {
+            printf("tx-state: %d, count:%d, O_data:%d\n", tx->v__DOT__state, tx->v__DOT__clk_count, tx->O_data); 
+            printf("rx-state: %d, count:%d, I_data_bit:%d, buffer:%d\n", m_core->v__DOT__state, m_core->v__DOT__clk_count, m_core->I_data_bit, m_core->v__DOT__buffer); 
+        }
+
+        void test_send_recv() {
+            Vuart_tx* tx = new Vuart_tx;
+
+            this->reset();
+            tx->I_clk = 1;
+            tx->I_reset = 1;
+            tx->eval();
+
+            tx->I_reset = 0;
+            uint8_t data = 5;
+            tx->I_data = data;
+            tx->I_exec = 1;
+
+            while (m_core->O_data_ready != 1) {
+                dump_state(tx);
+
+                tx->I_clk = 0;
+                tx->eval();
+                tx->I_clk = 1;
+                tx->eval();
+                tx->I_clk = 0;
+                tx->eval();
+
+                this->tick();
+
+                m_core->I_data_bit = tx->O_data;
+            }
+
+            ASSERT_EQ(m_core->O_data, 5);
+        }
+};
 
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
-    Vuart_rx* rx = new Vuart_rx; 
-    Vuart_tx* tx = new Vuart_tx;
+    Uart_Test_Bench *bench = new Uart_Test_Bench; 
 
-    rx->I_reset = 1;
-    tx->I_reset = 1;
-    rx->I_clk = 1;
-    tx->I_clk = 1;
-
-    rx->eval();
-    tx->eval();
-
-    rx->I_reset = 0;
-    tx->I_reset = 0;
-
-    NOP_CYCLE();
-
-    // send data
-    uint8_t data = 5;
-    tx->I_data = data;
-    tx->I_exec = 1;
-
-    while (rx->O_data_ready != 1) {
-        printf("tx-state: %d, count:%d, O_data:%d\n", tx->v__DOT__state, tx->v__DOT__clk_count, tx->O_data); 
-        printf("rx-state: %d, count:%d, I_data_bit:%d, buffer:%d\n", rx->v__DOT__state, rx->v__DOT__clk_count, rx->I_data_bit, rx->v__DOT__buffer); 
-        tx->I_clk = 1;
-        rx->I_clk = 1;
-        tx->eval();
-        rx->eval();
-
-        rx->I_data_bit = tx->O_data;
-
-        NOP_CYCLE();
-    }
-
-    CHECK(rx->O_data, 5, "Data should be 5 but received %d", rx->O_data);
+    bench->test_send_recv();
 
     printf("Success!\n");
 
-    delete rx;
-    delete tx;
+    delete bench;
     exit(0);
 }
