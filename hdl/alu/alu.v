@@ -121,58 +121,21 @@ begin: ALU
         begin
             if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
-                if ($signed(I_rA) < $signed(I_rB))
-                begin
-                    O_out[CMP_RB_GT_RA_BIT] <= 1;
-                end
-
-                if ($signed(I_rA) > $signed(I_rB))
-                begin
-                    O_out[CMP_RA_GT_RB_BIT] <= 1;
-                end
-
-                if ($signed(I_rA) == $signed(I_rB))
-                begin
-                    O_out[CMP_EQ_BIT] <= 1;
-                end
-
-                if ($signed(I_rA) == 0)
-                begin
-                    O_out[CMP_RA_ZERO_BIT] <= 1;
-                end
-
-                if ($signed(I_rB) == 0)
-                begin
-                    O_out[CMP_RB_ZERO_BIT] <= 1;
-                end
+                O_out[CMP_RB_GT_RA_BIT] <= $signed(I_rA) < $signed(I_rB) ? 1 : 0;
+                O_out[CMP_RA_GT_RB_BIT] <= $signed(I_rA) > $signed(I_rB) ? 1 : 0;
+                O_out[CMP_EQ_BIT]       <= $signed(I_rA) == $signed(I_rB) ? 1 : 0;
+                O_out[CMP_RA_ZERO_BIT]  <= $signed(I_rA) == 0 ? 1 : 0;
+                O_out[CMP_RB_ZERO_BIT]  <= $signed(I_rB) == 0 ? 1 : 0;
             end
             else
             begin
-                if ($unsigned(I_rA) < $unsigned(I_rB))
-                begin
-                    O_out[CMP_RB_GT_RA_BIT] <= 1;
-                end
-
-                if ($unsigned(I_rA) > $unsigned(I_rB))
-                begin
-                    O_out[CMP_RA_GT_RB_BIT] <= 1;
-                end
-
-                if ($unsigned(I_rA) == $unsigned(I_rB))
-                begin
-                    O_out[CMP_EQ_BIT] <= 1;
-                end
-
-                if ($unsigned(I_rA) == 0)
-                begin
-                    O_out[CMP_RA_ZERO_BIT] <= 1;
-                end
-
-                if ($unsigned(I_rB) == 0)
-                begin
-                    O_out[CMP_RB_ZERO_BIT] <= 1;
-                end
+                O_out[CMP_RB_GT_RA_BIT] <= $unsigned(I_rA) < $unsigned(I_rB) ? 1 : 0;
+                O_out[CMP_RA_GT_RB_BIT] <= $unsigned(I_rA) > $unsigned(I_rB) ? 1 : 0;
+                O_out[CMP_EQ_BIT]       <= $unsigned(I_rA) == $unsigned(I_rB) ? 1 : 0;
+                O_out[CMP_RA_ZERO_BIT]  <= $unsigned(I_rA) == 0 ? 1 : 0;
+                O_out[CMP_RB_ZERO_BIT]  <= $unsigned(I_rB) == 0 ? 1 : 0;
             end
+            O_out[15:5] <= 0;
             O_write_pc <= 0;
             O_write_rD <= 1;
             O_memory_mode <= MEM_NOP;

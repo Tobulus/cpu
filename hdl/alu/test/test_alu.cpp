@@ -5,6 +5,12 @@
 
 #define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
 
+#define CMP_EQ_BIT       0
+#define CMP_RA_GT_RB_BIT 1
+#define CMP_RB_GT_RA_BIT 2
+#define CMP_RA_ZERO_BIT  3
+#define CMP_RB_ZERO_BIT  4
+
 class Alu_Test_Bench: public TESTBENCH<Valu> {
 
     public:
@@ -290,19 +296,51 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
             CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
         }
 
+        void test_cmp() {
+            uint8_t expected;
+
+            m_core->I_enable = 1;
+            
+            // CMP - two unequal unsigned integers
+            m_core->I_opcode = 9;
+            m_core->I_opcode_mode = 1;
+
+            m_core->I_rA = 0;
+            m_core->I_rB = 1;
+            
+            this->tick();
+
+            expected = (1 << CMP_RB_GT_RA_BIT) | (1 << CMP_RA_ZERO_BIT);
+            CHECK(m_core->O_out, expected, "O_out should be %d but is %d\n", expected, m_core->O_out);
+            
+            // CMP - two unequal signed integers
+            m_core->I_opcode = 9;
+            m_core->I_opcode_mode = 0;
+
+            m_core->I_rA = 1;
+            m_core->I_rB = -1;
+            
+            this->tick();
+
+            expected = 1 << CMP_RA_GT_RB_BIT;
+            CHECK(m_core->O_out, expected, "O_out should be %d but is %d\n”", expected, m_core->O_out);
+        }
+
 };
 
 int main(int argc, char** argv, char** env) {
     Verilated::commandArgs(argc, argv);
     Alu_Test_Bench *bench = new Alu_Test_Bench;
+    bench->opentrace("trace.vcd");
 
-    bench->test_unsigned_add();
+    /*bench->test_unsigned_add();
     bench->test_signed_add();
     bench->test_unsigned_sub();
     bench->test_signed_sub();
     bench->test_or();
     bench->test_and();
-    bench->test_xor();
+    bench->test_xor();*/
+    bench->test_cmp();
 
     printf("Success!\n");
 
