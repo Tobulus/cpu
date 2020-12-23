@@ -3,8 +3,6 @@
 #include "verilated.h"
 #include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-
 class Core_Test_Bench: public TESTBENCH<Vcore> {
     
     public:
@@ -89,7 +87,7 @@ class Core_Test_Bench: public TESTBENCH<Vcore> {
 
             await_completion();   
 
-            CHECK(m_core->MEM_data_out, 3, "MEM_data_out should be 3 but is %d", m_core->MEM_data_out);
+            ASSERT_EQ(m_core->MEM_data_out, 3);
         }
 };
 

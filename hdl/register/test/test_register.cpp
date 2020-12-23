@@ -3,8 +3,6 @@
 #include "verilated.h"
 #include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-
 class Register_Test_Bench: public TESTBENCH<Vregister> {
 
     public:
@@ -28,8 +26,8 @@ class Register_Test_Bench: public TESTBENCH<Vregister> {
 
                 this->tick();
 
-                CHECK(m_core->O_rA_out, i,"O_rA_out should be %d but is %d\n", i, m_core->O_rA_out);
-                CHECK(m_core->O_rB_out, i,"O_rB_out should be %d but is %d\n", i, m_core->O_rB_out);
+                ASSERT_EQ(m_core->O_rA_out, i);
+                ASSERT_EQ(m_core->O_rB_out, i);
             }
         }
 

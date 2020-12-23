@@ -3,8 +3,6 @@
 #include "verilated.h"
 #include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-
 class Decoder_Test_Bench: public TESTBENCH<Vdecoder> {
     public:
         void test_decode() {
@@ -13,10 +11,10 @@ class Decoder_Test_Bench: public TESTBENCH<Vdecoder> {
 
             this->tick();
 
-            CHECK(m_core->O_opcode, 1, "O_opcode should be 1, but is %d\n", m_core->O_opcode);
-            CHECK(m_core->O_rA_select, 4, "O_rA_select should be 4, but is %d\n", m_core->O_rA_select);
-            CHECK(m_core->O_rB_select, 1, "O_rB_select should be 1, but is %d\n", m_core->O_rB_select);
-            CHECK(m_core->O_rD_select, 2, "O_rD_select should be 2, but is %d\n", m_core->O_rD_select);
+            ASSERT_EQ(m_core->O_opcode, 1);
+            ASSERT_EQ(m_core->O_rA_select, 4);
+            ASSERT_EQ(m_core->O_rB_select, 1);
+            ASSERT_EQ(m_core->O_rD_select, 2);
         }
 };
 

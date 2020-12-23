@@ -3,6 +3,8 @@
 
 #include <verilated_vcd_c.h>
 
+#define ASSERT_EQ(var, val) if((var)!=(val)){printf(#var" should be %d but is %d", val, var);exit(1);}
+
 /* https://zipcpu.com/blog/2017/06/21/looking-at-verilator.html */
 template<class MODULE>	class TESTBENCH {
     public:

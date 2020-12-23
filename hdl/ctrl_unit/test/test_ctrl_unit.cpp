@@ -3,14 +3,12 @@
 #include "verilated.h"
 #include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-
 class Ctrl_Unit_Test_Bench: public TESTBENCH<Vctrl_unit> {
     public:
         void test() {
             this->reset();
 
-            CHECK(m_core->O_state, 1, "State should be 1 after I_reset");
+            ASSERT_EQ(m_core->O_state, 1);
 
             // Fetch - perform memory operation
             m_core->I_mem_ready = 1; 
@@ -18,8 +16,8 @@ class Ctrl_Unit_Test_Bench: public TESTBENCH<Vctrl_unit> {
             m_core->I_clk = 1;
             this->tick();
 
-            CHECK(m_core->O_state, 1, "State should be 1 but is %d", m_core->O_state);
-            CHECK(m_core->O_execute, 1, "O_execute should be 1 but is %d", m_core->O_execute);
+            ASSERT_EQ(m_core->O_state, 1);
+            ASSERT_EQ(m_core->O_execute, 1);
 
             // Fetch - memory operation has been submitted but data is not yet available
             m_core->I_mem_ready = 0; 
@@ -27,8 +25,8 @@ class Ctrl_Unit_Test_Bench: public TESTBENCH<Vctrl_unit> {
             m_core->I_clk = 1;
             this->tick();
 
-            CHECK(m_core->O_state, 1, "State should be 1 but is %d", m_core->O_state);
-            CHECK(m_core->O_execute, 0, "O_execute should be 0 but is %d", m_core->O_execute);
+            ASSERT_EQ(m_core->O_state, 1);
+            ASSERT_EQ(m_core->O_execute, 0);
 
             // Fetch - instruction is available
             m_core->I_mem_ready = 0; 
@@ -36,29 +34,29 @@ class Ctrl_Unit_Test_Bench: public TESTBENCH<Vctrl_unit> {
             m_core->I_clk = 1;
             this->tick();
 
-            CHECK(m_core->O_state, 2, "State should be 1 but is %d", m_core->O_state);
-            CHECK(m_core->O_execute, 0, "O_execute should be 0 but is %d", m_core->O_execute);
+            ASSERT_EQ(m_core->O_state, 2);
+            ASSERT_EQ(m_core->O_execute, 0);
 
             // Decode 
             m_core->I_clk = 1;
             this->tick();
-            CHECK(m_core->O_state, 4, "State should be 4 but is %d", m_core->O_state);
+            ASSERT_EQ(m_core->O_state, 4);
 
             // Register read 
             m_core->I_clk = 1;
             this->tick();
-            CHECK(m_core->O_state, 8, "State should be 8 but is %d", m_core->O_state);
+            ASSERT_EQ(m_core->O_state, 8);
 
             // Execute
             m_core->I_instruction = 0;
             m_core->I_clk = 1;
             this->tick();
-            CHECK(m_core->O_state, 32, "State should be 32 but is %d", m_core->O_state);
+            ASSERT_EQ(m_core->O_state, 32);
 
             // Register write 
             m_core->I_clk = 1;
             this->tick();
-            CHECK(m_core->O_state, 1, "State should be 1 but is %d", m_core->O_state);
+            ASSERT_EQ(m_core->O_state, 1);
         }
 };
 

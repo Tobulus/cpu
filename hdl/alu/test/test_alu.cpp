@@ -3,8 +3,6 @@
 #include "verilated.h"
 #include "testbench.h"
 
-#define CHECK(var, val, ...) if(var!=val){printf(__VA_ARGS__);exit(1);}
-
 #define CMP_EQ_BIT       0
 #define CMP_RA_GT_RB_BIT 1
 #define CMP_RB_GT_RA_BIT 2
@@ -29,7 +27,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first operand 0, second positive
             m_core->I_rA = 0;
@@ -37,7 +35,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first positive, second operand 0
             m_core->I_rA = 5;
@@ -45,7 +43,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first operand 0, second operand 0
             m_core->I_rA = 0;
@@ -53,7 +51,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 0, "out should be 0 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 0);
         }
 
         void test_signed_add() {
@@ -70,7 +68,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first operand signed, second unsigned
             m_core->I_rA = -3;
@@ -78,7 +76,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // first operand unsigned, second signed
             m_core->I_rA = 3;
@@ -86,7 +84,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 1);
 
             // first operand signed, second 0
             m_core->I_rA = -1;
@@ -94,7 +92,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // first operand 0, second signed
             m_core->I_rA = 0;
@@ -102,7 +100,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // first operand signed, second signed
             m_core->I_rA = -2;
@@ -110,7 +108,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -5);
         }
 
         void test_unsigned_sub() {
@@ -127,7 +125,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // two positive operands - positive result
             m_core->I_rA = 3;
@@ -135,7 +133,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 1);
 
             // first operand 0, second positive
             m_core->I_rA = 0;
@@ -143,7 +141,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -5);
 
             // first positive, second operand 0
             m_core->I_rA = 5;
@@ -151,7 +149,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first operand 0, second operand 0
             m_core->I_rA = 0;
@@ -159,7 +157,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 0, "out should be 0 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 0);
         }
 
         void test_signed_sub() {
@@ -176,7 +174,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // unsigned operands - positive result
             m_core->I_rA = 3;
@@ -184,7 +182,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 1, "out should be 1 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 1);
 
             // first operand signed, second unsigned
             m_core->I_rA = -3;
@@ -192,7 +190,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -5, "out should be -5 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -5);
 
             // first operand unsigned, second signed
             m_core->I_rA = 3;
@@ -200,7 +198,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 5, "out should be 5 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 5);
 
             // first operand signed, second 0
             m_core->I_rA = -1;
@@ -208,7 +206,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, -1, "out should be -1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, -1);
 
             // first operand 0, second signed
             m_core->I_rA = 0;
@@ -216,7 +214,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, 1, "O_out should be 1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, 1);
 
             // first operand signed, second signed
             m_core->I_rA = -2;
@@ -224,7 +222,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK((signed short)m_core->O_out, 1, "O_out should be 1 but is %d", m_core->O_out);
+            ASSERT_EQ((signed short)m_core->O_out, 1);
         }
 
         void test_or() {
@@ -239,7 +237,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, (2|3), "O_out should be 3 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, (2|3));
 
             // 0 as operands
             m_core->I_rA = 0;
@@ -247,7 +245,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 0);
         }
 
         void test_and() {
@@ -262,7 +260,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, (2&3), "O_out should be 2 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, (2&3));
 
             // unsigned operands - positive result
             m_core->I_rA = 0;
@@ -270,7 +268,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 0);
         }
 
         void test_xor() {
@@ -285,7 +283,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, (1^2), "O_out should be 3 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, (1^2));
 
             // unsigned operands - positive result
             m_core->I_rA = 0;
@@ -293,37 +291,37 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 0, "O_out should be 0 but is %d", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 0);
         }
 
         void test_cmp() {
             uint8_t expected;
 
             m_core->I_enable = 1;
-            
+
             // CMP - two unequal unsigned integers
             m_core->I_opcode = 9;
             m_core->I_opcode_mode = 1;
 
             m_core->I_rA = 0;
             m_core->I_rB = 1;
-            
+
             this->tick();
 
             expected = (1 << CMP_RB_GT_RA_BIT) | (1 << CMP_RA_ZERO_BIT);
-            CHECK(m_core->O_out, expected, "O_out should be %d but is %d\n", expected, m_core->O_out);
-            
+            ASSERT_EQ(m_core->O_out, expected);
+
             // CMP - two unequal signed integers
             m_core->I_opcode = 9;
             m_core->I_opcode_mode = 0;
 
             m_core->I_rA = 1;
             m_core->I_rB = -1;
-            
+
             this->tick();
 
             expected = 1 << CMP_RA_GT_RB_BIT;
-            CHECK(m_core->O_out, expected, "O_out should be %d but is %d\n”", expected, m_core->O_out);
+            ASSERT_EQ(m_core->O_out, expected);
         }
 
         void test_jmp() {
@@ -335,15 +333,15 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
             this->tick();
 
-            CHECK(m_core->O_out, 6, "O_out should be 6 but is %d\n", m_core->O_out);
-            
+            ASSERT_EQ(m_core->O_out, 6);
+
             m_core->I_opcode_mode = 0;
             m_core->I_pc = 5;
             m_core->I_immediate = -2;
 
             this->tick();
 
-            CHECK(m_core->O_out, 3, "O_out should be 3 but is %d\n", m_core->O_out);
+            ASSERT_EQ(m_core->O_out, 3);
         }
 
 };
