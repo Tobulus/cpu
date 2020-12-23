@@ -326,6 +326,26 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
             CHECK(m_core->O_out, expected, "O_out should be %d but is %d\n”", expected, m_core->O_out);
         }
 
+        void test_jmp() {
+            m_core->I_enable = 1;
+            m_core->I_opcode = 12;
+            m_core->I_opcode_mode = 1;
+            m_core->I_pc = 1;
+            m_core->I_immediate = 5;
+
+            this->tick();
+
+            CHECK(m_core->O_out, 6, "O_out should be 6 but is %d\n", m_core->O_out);
+            
+            m_core->I_opcode_mode = 0;
+            m_core->I_pc = 5;
+            m_core->I_immediate = -2;
+
+            this->tick();
+
+            CHECK(m_core->O_out, 3, "O_out should be 3 but is %d\n", m_core->O_out);
+        }
+
 };
 
 int main(int argc, char** argv, char** env) {
@@ -341,6 +361,7 @@ int main(int argc, char** argv, char** env) {
     bench->test_and();
     bench->test_xor();
     bench->test_cmp();
+    bench->test_jmp();
 
     printf("Success!\n");
 
