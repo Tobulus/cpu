@@ -326,7 +326,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
 
         void test_jmp() {
             m_core->I_enable = 1;
-            m_core->I_opcode = 12;
+            m_core->I_opcode = 11;
             m_core->I_opcode_mode = 1;
             m_core->I_pc = 1;
             m_core->I_immediate = 5;

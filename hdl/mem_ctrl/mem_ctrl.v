@@ -2,6 +2,7 @@ module mem_ctrl(input I_clk,
     input I_reset, 
     input I_exec,
     input I_write,
+    input I_size,
     input I_addr, 
     input I_data,
     output O_data, 
@@ -11,17 +12,22 @@ module mem_ctrl(input I_clk,
     output MEM_exec,
     output MEM_write,
     output MEM_addr,
+    output MEM_size,
     output MEM_data_out,
     input MEM_data_in,
 input MEM_data_ready);
 
-reg[15:0] I_addr, I_data, O_data, MEM_data_in, MEM_data_out, MEM_addr;
+wire[1:0] I_size;
+wire[15:0] I_addr, I_data, MEM_data_in;
+reg[15:0] O_data, MEM_data_out, MEM_addr;
+reg[1:0] MEM_size;
 reg[1:0] state = 0;
 
 always @(*)
 begin
     MEM_addr = I_addr;
     MEM_write = I_write;
+    MEM_size = I_size;
     MEM_data_out = I_data;
     O_data = MEM_data_in;
 

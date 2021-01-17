@@ -1,5 +1,5 @@
 set -x
 rm -rf ./obj_dir
-verilator -Wall --cc *.v -I../alu/ -I../core/ -I../ram/ -I../register/ -I../mem_ctrl/ -I../ctrl_unit/ -I../pc/ -I../decoder/ --exe test/test_*.cpp
+verilator -Wall --trace --cc *.v -I../alu/ -I../core/ -I../ram/ -I../register/ -I../mem_ctrl/ -I../ctrl_unit/ -I../pc/ -I../decoder/ -I../uart/ --exe test/test_*.cpp -CFLAGS -I../../test
 cd obj_dir
-make -f Vcore.mk
+make -f Vsystem.mk

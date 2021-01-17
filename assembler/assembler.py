@@ -2,29 +2,33 @@ import re, sys
 from optparse import OptionParser
 
 LABEL   = "(\w+):"
-ADD     = "add r(\d), r(\d), r(\d)"
-SUB     = "sub r(\d), r(\d), r(\d)"
+ADD     = "add.(u|s) r(\d), r(\d), r(\d)"
+ADDI    = "addi.(u|s) r(\d), r(\d), (-?\d{1,3})"
+SUB     = "sub.(u|s) r(\d), r(\d), r(\d)"
+SUBI    = "subi.(u|s) r(\d), r(\d), (-?\d{1,3})"
 NOT     = "not r(\d), r(\d)"
-OR      = "or r(\d), r(\d)"
-AND     = "and r(\d), r(\d)"
-XOR     = "xor r(\d), r(\d)"
-READ    = "read r(\d), r(\d)(, r(\d))?"
-WRITE   = "write r(\d), r(\d)(, r(\d)?)" 
-LOAD    = "not r(\d), (\d{1,3})"
+OR      = "or r(\d), r(\d), ((r(\d))|(-?\d{1,3}))"
+AND     = "and r(\d), r(\d), ((r(\d))|(-?\d{1,3}))"
+XOR     = "xor r(\d), r(\d), ((r(\d))|(-?\d{1,3}))"
+READW   = "read.w r(\d), r(\d)(, (-?\d{1,3}))?"
+READB   = "read.b r(\d), r(\d)(, (-?\d{1,3}))?"
+WRITEW  = "write.w r(\d), r(\d)(, (-?\d{1,3}))?" 
+WRITEB  = "write.b r(\d), r(\d)(, (-?\d{1,3}))?" 
+LOAD    = "load.(l|h) r(\d), (-?\d{1,3})"
 CMP     = "cmp r(\d), r(\d), r(\d)"
-SHIFTL  = "shftl r(\d), r(\d)"
-SHIFTR  = "shftr r(\d), r(\d)"
-BI      = "bi $(\w+)"
+SHIFTL  = "shiftl r(\d), r(\d)(, (\d{1,3}))?"
+SHIFTR  = "shiftr r(\d), r(\d)(, (\d{1,3}))?"
+BI      = "bi \$(\w+)"
 BR      = "br.(gt|lt|az|bz|eq) r(\d), r(\d)"
-BROEQ   = "bro.(gt|lt|az|bz|eq) r(\d), $(\w+))"
+BRO     = "bro.(gt|lt|az|bz|eq) r(\d), \$(\w+)"
 SPC     = "spc r(\d)"
 
-SHIFT_OPCODE = 12
-SHIFT_RD     = 9
-SHIFT_MODE   = 8
-SHIFT_RA     = 5
-SHIFT_RB     = 2
-
+SHIFT_OPCODE            = 12
+SHIFT_RD                = 9
+SHIFT_MODE              = 8
+SHIFT_RA                = 5
+SHIFT_RB                = 2
+SHIFT_IMMEDIATE_ADD_SUB = 1
 CMP_EQ = 0
 CMP_RA_GT_RB = 1
 CMP_RB_GT_RA = 2
@@ -39,11 +43,14 @@ optparser.add_option("--output", action="store", type="string", dest="output_fil
 
 output = []
 
+def two_complement(n, bits):
+    return n & int(bin((1 << (bits)) - 1), 2)
+
 with open(options.input_file) as f:
     pos = 0
     labels = {}
     lines = [line[:-1] for line in f.readlines()]
-    
+
     # parse all labels first to get their memory offsets
     for line in lines:
         if match := re.fullmatch(LABEL, line):
@@ -52,101 +59,203 @@ with open(options.input_file) as f:
             labels[match.group(1)] = pos
         else:
             pos += 2
-
+    print(labels)
     # parse instructions
     pos = 0
     for line in lines:
         instruction = 0
 
         if match := re.fullmatch(ADD, line):
-            instruction = int(match.group(1)) << SHIFT_RD \
-                          | int(match.group(2)) << SHIFT_RA \
-                          | int(match.group(3)) << SHIFT_RB
+            print("{}: add".format(line))
+            instruction = int(match.group(2)) << SHIFT_RD \
+                    | int(match.group(3)) << SHIFT_RA \
+                    | int(match.group(4)) << SHIFT_RB
+            if match.group(1) == 'u':
+                instruction |= 1 << SHIFT_MODE
+            elif match.group(1) == 's':
+                pass
+            else:
+                raise Exception('Mode "{}" does not exist'.format(match.group(1)))
             output.append(instruction)
 
         elif match := re.fullmatch(SUB, line):
+            print("{}: sub".format(line))
             instruction = 1 << SHIFT_OPCODE \
-                    | int(match.group(1)) << SHIFT_RD \
-                    | int(match.group(2)) << SHIFT_RA \
-                    | int(match.group(3)) << SHIFT_RB
+                    | int(match.group(2)) << SHIFT_RD \
+                    | int(match.group(3)) << SHIFT_RA \
+                    | int(match.group(4)) << SHIFT_RB
+            if match.group(1) == 'u':
+                instruction |= 1 << SHIFT_MODE
+            elif match.group(1) == 's':
+                pass
+            else:
+                raise Exception('Mode "{}" does not exist'.format(match.group(1)))
+            output.append(instruction)
+
+        elif match := re.fullmatch(ADDI, line):
+            print("{}: addi".format(line))
+            instruction = int(match.group(2)) << SHIFT_RD \
+                    | int(match.group(3)) << SHIFT_RA \
+                    | two_complement(int(match.group(4)), 4) << SHIFT_IMMEDIATE_ADD_SUB \
+                    | 1
+            if match.group(1) == 'u':
+                instruction |= 1 << SHIFT_MODE
+            elif match.group(1) == 's':
+                pass
+            else:
+                raise Exception('Mode "{}" does not exist'.format(match.group(1)))
+            output.append(instruction)
+
+        elif match := re.fullmatch(SUBI, line):
+            print("{}: subi".format(line))
+            instruction = 1 << SHIFT_OPCODE \
+                    | int(match.group(2)) << SHIFT_RD \
+                    | int(match.group(3)) << SHIFT_RA \
+                    | two_complement(int(match.group(4)), 4) << SHIFT_IMMEDIATE_ADD_SUB \
+                    | 1
+            if match.group(1) == 'u':
+                instruction |= 1 << SHIFT_MODE
+            elif match.group(1) == 's':
+                pass
+            else:
+                raise Exception('Mode "{}" does not exist'.format(match.group(1)))
             output.append(instruction)
 
         elif match := re.fullmatch(OR, line):
+            print("{}: or".format(line))
             instruction = 2 << SHIFT_OPCODE \
                     | int(match.group(1)) << SHIFT_RD \
                     | int(match.group(2)) << SHIFT_RA
+            if match.group(4):
+                instruction |= int(match.group(5)) << SHIFT_RB
+            else:
+                instruction |= int(match.group(6))
+                instruction |= 1 << SHIFT_MODE
             output.append(instruction)
 
         elif match := re.fullmatch(AND, line):
+            print("{}: and".format(line))
             instruction = 3 << SHIFT_OPCODE \
                     | int(match.group(1)) << SHIFT_RD \
                     | int(match.group(2)) << SHIFT_RA
+            if match.group(4):
+                instruction |= int(match.group(5)) << SHIFT_RB
+            else:
+                instruction |= int(match.group(6))
+                instruction |= 1 << SHIFT_MODE
             output.append(instruction)
 
         elif match := re.fullmatch(XOR, line):
+            print("{}: xor".format(line))
             instruction = 4 << SHIFT_OPCODE \
                     | int(match.group(1)) << SHIFT_RD \
                     | int(match.group(2)) << SHIFT_RA
+            if match.group(4):
+                instruction |= int(match.group(5)) << SHIFT_RB
+            else:
+                instruction |= int(match.group(6))
+                instruction |= 1 << SHIFT_MODE
             output.append(instruction)
 
         elif match := re.fullmatch(NOT, line):
+            print("{}: not".format(line))
             instruction = 5 << SHIFT_OPCODE \
                     | int(match.group(1)) << SHIFT_RD \
                     | int(match.group(2)) << SHIFT_RA
             output.append(instruction)
 
-        elif match := re.fullmatch(READ, line):
+        elif match := re.fullmatch(READW, line):
+            print("{}: readw".format(line))
             instruction = 6 << SHIFT_OPCODE \
-                    | int(match.group(1)) << SHIFT_RA \
-                    | int(match.group(2)) << SHIFT_RB
+                    | 1 << SHIFT_MODE \
+                    | int(match.group(1)) << SHIFT_RD \
+                    | int(match.group(2)) << SHIFT_RA
             if match.group(3):
                 instruction |= int(match.group(4))
             output.append(instruction)
 
-        elif match := re.fullmatch(WRITE, line):
+        elif match := re.fullmatch(READB, line):
+            print("{}: readb".format(line))
+            instruction = 6 << SHIFT_OPCODE \
+                    | int(match.group(1)) << SHIFT_RD \
+                    | int(match.group(2)) << SHIFT_RA
+            if match.group(3):
+                instruction |= int(match.group(4))
+            output.append(instruction)
+
+        elif match := re.fullmatch(WRITEW, line):
+            print("{}: writew".format(line))
+            instruction = 7 << SHIFT_OPCODE \
+                    | 1 << SHIFT_MODE \
+                    | int(match.group(1)) << SHIFT_RA \
+                    | int(match.group(2)) << SHIFT_RB
+            if match.group(3):
+                instruction |= (int(match.group(4)) & 28) << SHIFT_RD
+                instruction |= (int(match.group(4)) & 3)
+            output.append(instruction)
+
+        elif match := re.fullmatch(WRITEB, line):
+            print("{}: writeb".format(line))
             instruction = 7 << SHIFT_OPCODE \
                     | int(match.group(1)) << SHIFT_RA \
                     | int(match.group(2)) << SHIFT_RB
             if match.group(3):
-                instruction |= int(match.group(4))
+                instruction |= (int(match.group(4)) & 28) << SHIFT_RD
+                instruction |= (int(match.group(4)) & 3)
             output.append(instruction)
 
         elif match := re.fullmatch(LOAD, line):
+            print("{}:load".format(line))
             instruction = 8 << SHIFT_OPCODE \
-                    | int(match.group(1)) << SHIFT_RD \
-                    | int(match.group(2)) 
+                    | int(match.group(2)) << SHIFT_RD \
+                    | int(match.group(3))
+            if match.group(1) == 'h':
+                instruction |= 1 << SHIFT_MODE
+            elif match.group(1) == 'l':
+                pass
+            else:
+                raise Exception('Mode "{}" does not exist'.format(match.group(1)))
             output.append(instruction)
 
         elif match := re.fullmatch(CMP, line):
-           instruction = 9 << SHIFT_OPCODE \
-                   | int(match.group(1)) << SHIFT_RD \
-                   | int(match.group(2)) << SHIFT_RA \
-                   | int(match.group(3)) << SHIFT_RB
-           output.append(instruction)
+            print("{}: cmp".format(line))
+            instruction = 9 << SHIFT_OPCODE \
+                    | int(match.group(1)) << SHIFT_RD \
+                    | int(match.group(2)) << SHIFT_RA \
+                    | int(match.group(3)) << SHIFT_RB
+            output.append(instruction)
 
         elif match := re.fullmatch(SHIFTL, line):
-           instruction = 10 << SHIFT_OPCODE \
+            print("{}: shiftl".format(line))
+            instruction = 10 << SHIFT_OPCODE \
                    | int(match.group(1)) << SHIFT_RD \
                    | int(match.group(2)) << SHIFT_RA
-           output.append(instruction)
+            if match.group(3):
+                instruction |= int(match.group(4))
+            output.append(instruction)
 
         elif match := re.fullmatch(SHIFTR, line):
-           instruction = 11 << SHIFT_OPCODE \
+           print("{}: shiftr".format(line))
+           instruction = 10 << SHIFT_OPCODE \
+                   | 1 << SHIFT_MODE \
                    | int(match.group(1)) << SHIFT_RD \
                    | int(match.group(2)) << SHIFT_RA
+           if match.group(3):
+               instruction |= int(match.group(4))
            output.append(instruction)
 
         elif match := re.fullmatch(BI, line):
+           print("{}: bi".format(line))
            if not match.group(1) in labels:
                raise Exception("Label '{}' not defined.".format(match.group(1)))
 
-           instruction = 12 << SHIFT_OPCODE \
-                   | CMP_EQ << SHIFT_RD \
+           instruction = 11 << SHIFT_OPCODE \
                    | (labels[match.group(1)] - pos)
            output.append(instruction)
 
         elif match := re.fullmatch(BR, line):
-           instruction = 13 << SHIFT_OPCODE \
+           print("{}: br".format(line))
+           instruction = 12 << SHIFT_OPCODE \
                    | int(match.group(2)) << SHIFT_RA \
                    | int(match.group(3)) << SHIFT_RB
            if match.group(1) == 'eq':
@@ -164,10 +273,11 @@ with open(options.input_file) as f:
            output.append(instruction)
 
         elif match := re.fullmatch(BRO, line):
-           instruction = 13 << SHIFT_OPCODE \
+           print("{}: bro".format(line))
+           instruction = 12 << SHIFT_OPCODE \
                    | 1 << SHIFT_MODE \
                    | int(match.group(2)) << SHIFT_RA \
-                   | int(match.group(3)) << SHIFT_RB
+                   | int(match.group(3))
            if match.group(1) == 'eq':
                instruction |= 0 << SHIFT_RD
            elif match.group(1) == 'gt':
@@ -183,11 +293,12 @@ with open(options.input_file) as f:
            output.append(instruction)
 
         elif match := re.fullmatch(SPC, line):
-            instruction = 14 << SHIFT_OPCODE \
-                    | int(match.group(1)) << SHIFT_RD
+           print("{}: spc".format(line))
+           instruction = 13 << SHIFT_OPCODE \
+                   | int(match.group(1)) << SHIFT_RD
 
         elif match := re.fullmatch(LABEL, line):
-           # do not increase the offset counter
+            # do not increase the offset counter
            continue
 
         else:

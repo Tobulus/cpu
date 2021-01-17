@@ -2,15 +2,16 @@ module core(input I_clk,
     input I_reset,
     input MEM_ready,
     input MEM_data_in, 
-input MEM_data_ready,
+    input MEM_data_ready,
     output MEM_exec, 
-    output MEM_write, 
+    output MEM_write,
+   output MEM_size, 
     output MEM_addr, 
-    output MEM_data_out);
+output MEM_data_out);
 
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
 reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
-reg[1:0] memory_mode;
+reg[1:0] memory_mode, memory_size;
 reg[2:0] rD_select, rA_select, rB_select;
 reg[3:0] opcode;
 reg[7:0] immediate;
@@ -29,6 +30,7 @@ alu alu(.I_clk(I_clk),
     .I_rB(rB_out),
     .I_compare_code(rD_select),
     .O_memory_mode(memory_mode),
+    .O_memory_size(memory_size),
     .O_out(alu_out),
     .O_write_rD(alu_write_rD),
 .O_write_pc(pc_write));
@@ -56,6 +58,7 @@ mem_ctrl mem_ctrl(.I_clk(I_clk),
     .I_reset(I_reset), 
     .I_exec(mem_execute),
     .I_write(mem_write),
+    .I_size(memory_size),
     .I_addr(mem_addr),
     .I_data(mem_data_in),
     .O_data(mem_data_out),
@@ -64,6 +67,7 @@ mem_ctrl mem_ctrl(.I_clk(I_clk),
     .MEM_ready(MEM_ready),
     .MEM_exec(MEM_exec),
     .MEM_write(MEM_write),
+    .MEM_size(MEM_size),
     .MEM_addr(MEM_addr),
     .MEM_data_out(MEM_data_out),
     .MEM_data_in(MEM_data_in),

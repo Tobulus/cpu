@@ -8,17 +8,22 @@
  0  0  0  1|rD     |1|rA   |rB   |   | Sub unsigned 
  0  0  0  1|rD     |1|rA   |Immedi.|1| Sub unsigned immediate 
  0  0  1  0|rD     |0|rA   |rB   |   | Or
+ 0  0  1  0|rD     |1|rA   |Immediate| Or immediate
  0  0  1  1|rD     |0|rA   |rB   |   | And
+ 0  0  1  1|rD     |1|rA   |Immediate| And immediate
  0  1  0  0|rD     |0|rA   |rB   |   | Xor
+ 0  1  0  0|rD     |1|rA   |Immediate| Xor immediate
  0  1  0  1|rD     |0|rA   |     |   | Not
- 0  1  1  0|rD     |0|rA   |Immediate| Memory read
- 0  1  1  1|Immedi |0|rA   |rB   |ate| Memory write
+ 0  1  1  0|rD     |0|rA   |Immediate| Memory read (1 byte)
+ 0  1  1  0|rD     |1|rA   |Immediate| Memory read (2 byte)
+ 0  1  1  1|Immedi |0|rA   |rB   |ate| Memory write (1 byte)
+ 0  1  1  1|Immedi |1|rA   |rB   |ate| Memory write (2 byte)
  1  0  0  0|rD     |0|Immediate      | Load low
  1  0  0  0|rD     |1|Immediate      | Load high
  1  0  0  1|rD     |0|rA   |rB   |   | Compare
- 1  0  1  0|rD     |0|rA   |     |   | Shift Left
- 1  0  1  1|rD     |0|rA   |     |   | Shift Right
- 1  1  0  0|       |0|Immediate      | Branch immediate offset
- 1  1  0  1|c  c  c|0|rA   |rB   |   | Branch compare
- 1  1  0  1|c  c  c|1|rA   |Immediate| Branch compare immediate offset
- 1  1  1  0|rD     |0|     |         | Save stack pointer
+ 1  0  1  0|rD     |0|rA   |Immediate| Shift Left
+ 1  0  1  0|rD     |1|rA   |Immediate| Shift Right
+ 1  0  1  1|       |0|Immediate      | Branch immediate offset
+ 1  1  0  0|c  c  c|0|rA   |rB   |   | Branch compare
+ 1  1  0  0|c  c  c|1|rA   |Immediate| Branch compare immediate offset
+ 1  1  0  1|rD     |0|     |         | Save stack pointer

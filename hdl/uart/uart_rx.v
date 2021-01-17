@@ -23,9 +23,7 @@ begin: uart_rx
             if (I_data_bit == 0) begin
                 state <= 1;
             end
-            else begin
-                O_data_ready <= 0;
-            end
+            O_data_ready <= 0;
         end
         // Start-Bit
         else if (state == 1) begin
