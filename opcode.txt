@@ -3,9 +3,9 @@
  0  0  0  0|rD     |0|rA   |Immedi.|1| Add signed immediate
  0  0  0  0|rD     |1|rA   |rB   | |0| Add unsigned 
  0  0  0  0|rD     |1|rA   |Immedi.|1| Add unsigned immediate
- 0  0  0  1|rD     |0|rA   |rB   |   | Sub signed
+ 0  0  0  1|rD     |0|rA   |rB   |  0| Sub signed
  0  0  0  1|rD     |0|rA   |Immedi.|1| Sub signed immediate
- 0  0  0  1|rD     |1|rA   |rB   |   | Sub unsigned 
+ 0  0  0  1|rD     |1|rA   |rB   |  0| Sub unsigned 
  0  0  0  1|rD     |1|rA   |Immedi.|1| Sub unsigned immediate 
  0  0  1  0|rD     |0|rA   |rB   |   | Or
  0  0  1  0|rD     |1|rA   |Immediate| Or immediate

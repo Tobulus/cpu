@@ -43,8 +43,8 @@ begin: uart_tx
             end
         end
         // Transfer
-        else if (state <= 8) begin
-            O_data <= buffer[state];
+        else if (state <= 9) begin
+            O_data <= buffer[state-2];
             clk_count <= clk_count + 1;
             if (clk_count >= CLKS_PER_BIT) begin
                 state <= state + 1;

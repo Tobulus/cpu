@@ -133,7 +133,6 @@ begin: ALU
         end
         else if (I_opcode == READ)
         begin
-            // TODO: this way we cannot adress the full memory
             O_out <= $signed(I_rA) + $signed(I_immediate[4:0]);
             O_write_pc <= 0;
             O_write_rD <= 1;
@@ -142,7 +141,6 @@ begin: ALU
         end
         else if (I_opcode == WRITE)
         begin
-            // TODO: this way we cannot adress the full memory
             O_out <= $signed(I_rA) + $signed(I_immediate[4:0]);
             O_write_pc <= 0;
             O_write_rD <= 0;
