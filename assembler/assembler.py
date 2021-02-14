@@ -250,7 +250,7 @@ with open(options.input_file) as f:
                raise Exception("Label '{}' not defined.".format(match.group(1)))
 
            instruction = 11 << SHIFT_OPCODE \
-                   | (labels[match.group(1)] - pos)
+                   | two_complement((labels[match.group(1)] - pos), 8)
            output.append(instruction)
 
         elif match := re.fullmatch(BR, line):
@@ -277,7 +277,7 @@ with open(options.input_file) as f:
            instruction = 12 << SHIFT_OPCODE \
                    | 1 << SHIFT_MODE \
                    | int(match.group(2)) << SHIFT_RA \
-                   | int(match.group(3))
+                   | two_complement((labels[match.group(3)] - pos), 8)
            if match.group(1) == 'eq':
                instruction |= 0 << SHIFT_RD
            elif match.group(1) == 'gt':
