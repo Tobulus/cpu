@@ -23,7 +23,8 @@
  1  0  0  1|rD     |0|rA   |rB   |   | Compare
  1  0  1  0|rD     |0|rA   |Immediate| Shift Left
  1  0  1  0|rD     |1|rA   |Immediate| Shift Right
- 1  0  1  1|       |0|Immediate      | Branch immediate offset
+ 1  0  1  1|       |0|Immediate      | Branch immed. offset(signed)
+ 1  0  1  1|       |1|rA             | Branch
  1  1  0  0|c  c  c|0|rA   |rB   |   | Branch compare
  1  1  0  0|c  c  c|1|rA   |Immediate| Branch compare immediate offset
  1  1  0  1|rD     |0|     |         | Save stack pointer

@@ -11,7 +11,7 @@ output MEM_data_out);
 
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
 reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
-reg[1:0] memory_mode, memory_size;
+reg[1:0] memory_mode, memory_size, alu_memory_size, MEM_size;
 reg[2:0] rD_select, rA_select, rB_select;
 reg[3:0] opcode;
 reg[7:0] immediate;
@@ -30,7 +30,7 @@ alu alu(.I_clk(I_clk),
     .I_rB(rB_out),
     .I_compare_code(rD_select),
     .O_memory_mode(memory_mode),
-    .O_memory_size(memory_size),
+    .O_memory_size(alu_memory_size),
     .O_out(alu_out),
     .O_write_rD(alu_write_rD),
 .O_write_pc(pc_write));
@@ -93,7 +93,7 @@ pc pc(.I_clk(I_clk),
 
 always @(*)
 begin
-    instruction = MEM_data_in;
+    instruction = MEM_data_in;//TODO: mem_data_out;
     decoder_enable = state[1];
     register_enable = state[2] || state[5];
     alu_enable = state[3];
@@ -104,6 +104,7 @@ begin
     mem_data_in = rB_out;
     write_rD = state[5] && alu_write_rD;
     register_in = state[4] ? mem_data_out : alu_out;
+    memory_size = state[0] ? 2 : alu_memory_size;
 
     if (mem_enable && memory_mode == MEM_WRITE)
     begin

@@ -42,7 +42,7 @@ int main(int argc, char** argv, char** env) {
     bench->test_write_counter(0);
 
     for (i = 1; i < 100; i++) {
-        bench->test_inc_counter(i);
+        bench->test_inc_counter(i*2);
     }
 
     printf("Success!\n");

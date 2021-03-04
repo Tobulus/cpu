@@ -19,6 +19,7 @@ CMP     = "cmp r(\d), r(\d), r(\d)"
 SHIFTL  = "shiftl r(\d), r(\d)(, (\d{1,3}))?"
 SHIFTR  = "shiftr r(\d), r(\d)(, (\d{1,3}))?"
 BI      = "bi \$(\w+)"
+BRI     = "br r(\d)"
 BR      = "br.(gt|lt|az|bz|eq) r(\d), r(\d)"
 BRO     = "bro.(gt|lt|az|bz|eq) r(\d), \$(\w+)"
 SPC     = "spc r(\d)"
@@ -253,6 +254,13 @@ with open(options.input_file) as f:
                    | two_complement((labels[match.group(1)] - pos), 8)
            output.append(instruction)
 
+        elif match := re.fullmatch(BRI, line):
+           print("{}: bri".format(line))
+           instruction = 11 << SHIFT_OPCODE \
+                   | int(match.group(1)) << SHIFT_RA \
+                   | 1 << SHIFT_MODE
+           output.append(instruction)
+
         elif match := re.fullmatch(BR, line):
            print("{}: br".format(line))
            instruction = 12 << SHIFT_OPCODE \
@@ -274,10 +282,14 @@ with open(options.input_file) as f:
 
         elif match := re.fullmatch(BRO, line):
            print("{}: bro".format(line))
+           print("reg={}".format(int(match.group(2))))
+           print("immediate={}".format(two_complement((labels[match.group(3)] - pos), 5)))
+           print("pos="+str(pos))
+           print("labelpos="+str(labels[match.group(3)]));
            instruction = 12 << SHIFT_OPCODE \
                    | 1 << SHIFT_MODE \
                    | int(match.group(2)) << SHIFT_RA \
-                   | two_complement((labels[match.group(3)] - pos), 8)
+                   | two_complement((labels[match.group(3)] - pos), 5)
            if match.group(1) == 'eq':
                instruction |= 0 << SHIFT_RD
            elif match.group(1) == 'gt':

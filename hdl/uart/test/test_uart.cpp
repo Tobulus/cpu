@@ -7,10 +7,10 @@
 class Uart_Test_Bench: public TESTBENCH<Vuart_rx> {
     public:
 
-        void dump_state(Vuart_tx *tx) {
-            printf("tx-state: %d, count:%d, O_data:%d, O_ready:%d, buffer:%d\n", tx->v__DOT__state, tx->v__DOT__clk_count, tx->O_data,tx->O_ready, tx->v__DOT__buffer); 
-            printf("rx-state: %d, count:%d, I_data_bit:%d, buffer:%d, O_data_ready:%d, O_ready:%d\n", m_core->v__DOT__state, m_core->v__DOT__clk_count, m_core->I_data_bit, m_core->v__DOT__buffer,m_core->O_data_ready,m_core->O_ready); 
-        }
+       /*void dump_state(Vuart_tx *tx) {
+            printf("tx-state: %d, count:%d, O_data:%d, O_ready:%d, buffer:%d\n", tx->uart_tx__DOT__state, tx->uart_tx__DOT__clk_count, tx->O_data,tx->O_ready, tx->uart_tx__DOT__buffer); 
+            printf("rx-state: %d, count:%d, I_data_bit:%d, buffer:%d, O_data_ready:%d, O_ready:%d\n", m_core->uart_tx__DOT__state, m_core->uart_tx__DOT__clk_count, m_core->I_data_bit, m_core->uart_tx__DOT__buffer,m_core->O_data_ready,m_core->O_ready); 
+        }*/
 
         void test_send_recv() {
             Vuart_tx* tx = new Vuart_tx;

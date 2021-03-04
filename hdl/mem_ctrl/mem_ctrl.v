@@ -63,7 +63,7 @@ begin: MEM_CTRL
             if (MEM_data_ready == 1)
             begin
                 O_data_ready <= 1;
-                state <= 0;
+                state <= 2; // clear data_ready and check MEM_ready
             end
         end
         else if (state == 2)

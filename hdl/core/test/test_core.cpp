@@ -11,42 +11,42 @@ class Core_Test_Bench: public TESTBENCH<Vcore> {
             int i;
 
             printf("----------------------------------\n");
-            printf("mem_enable=%d\n", m_core->v__DOT__mem_enable);
-            printf("alu_write_rD=%d\n", m_core->v__DOT__alu_write_rD);
-            printf("pc_write=%d\n", m_core->v__DOT__pc_write);
-            printf("mem_ready=%d\n", m_core->v__DOT__mem_ready);
-            printf("mem_execute=%d\n", m_core->v__DOT__mem_execute);
-            printf("mem_write=%d\n", m_core->v__DOT__mem_write);
-            printf("mem_data_ready=%d\n", m_core->v__DOT__mem_data_ready);
-            printf("memory_mode=%d\n", m_core->v__DOT__memory_mode);
-            printf("rD_select=%d\n", m_core->v__DOT__rD_select);
-            printf("rA_select=%d\n", m_core->v__DOT__rA_select);
-            printf("rB_select=%d\n", m_core->v__DOT__rB_select);
-            printf("opcode=%d\n", m_core->v__DOT__opcode);
-            printf("immediate=%d\n", m_core->v__DOT__immediate);
-            printf("state=%d\n", m_core->v__DOT__state);
-            printf("ctrl_unit_mem_wait=%d\n", m_core->v__DOT__ctrl_unit__DOT__mem_wait);
-            printf("mem_ctrl_state=%d\n", m_core->v__DOT__mem_ctrl__DOT__state);
-            printf("pc_out=%d\n", m_core->v__DOT__pc_out);
-            printf("rA_out=%d\n", m_core->v__DOT__rA_out);
-            printf("rB_out=%d\n", m_core->v__DOT__rB_out);
-            printf("alu_out=%d\n", m_core->v__DOT__alu_out);
-            printf("mem_addr=%d\n", m_core->v__DOT__mem_addr);
-            printf("mem_ctrl_state[0]=%d\n", m_core->__Vtable1_v__DOT__mem_ctrl__DOT__state[0]);
-            printf("mem_ctrl_state[1]=%d\n", m_core->__Vtable1_v__DOT__mem_ctrl__DOT__state[1]);
+            printf("mem_enable=%d\n", m_core->core__DOT__mem_enable);
+            printf("alu_write_rD=%d\n", m_core->core__DOT__alu_write_rD);
+            printf("pc_write=%d\n", m_core->core__DOT__pc_write);
+            printf("mem_ready=%d\n", m_core->core__DOT__mem_ready);
+            printf("mem_execute=%d\n", m_core->core__DOT__mem_execute);
+            printf("mem_write=%d\n", m_core->core__DOT__mem_write);
+            printf("mem_data_ready=%d\n", m_core->core__DOT__mem_data_ready);
+            printf("memory_mode=%d\n", m_core->core__DOT__memory_mode);
+            printf("rD_select=%d\n", m_core->core__DOT__rD_select);
+            printf("rA_select=%d\n", m_core->core__DOT__rA_select);
+            printf("rB_select=%d\n", m_core->core__DOT__rB_select);
+            printf("opcode=%d\n", m_core->core__DOT__opcode);
+            printf("immediate=%d\n", m_core->core__DOT__immediate);
+            printf("state=%d\n", m_core->core__DOT__state);
+            printf("ctrl_unit_mem_wait=%d\n", m_core->core__DOT__ctrl_unit__DOT__mem_wait);
+            printf("mem_ctrl_state=%d\n", m_core->core__DOT__mem_ctrl__DOT__state);
+            printf("pc_out=%d\n", m_core->core__DOT__pc_out);
+            printf("rA_out=%d\n", m_core->core__DOT__rA_out);
+            printf("rB_out=%d\n", m_core->core__DOT__rB_out);
+            printf("alu_out=%d\n", m_core->core__DOT__alu_out);
+            printf("mem_addr=%d\n", m_core->core__DOT__mem_addr);
+            printf("mem_ctrl_state[0]=%d\n", m_core->__Vtable1_core__DOT__mem_ctrl__DOT__state[0]);
+            printf("mem_ctrl_state[1]=%d\n", m_core->__Vtable1_core__DOT__mem_ctrl__DOT__state[1]);
             printf("MEM_data_out=%d\n", m_core->MEM_data_out);
 
             for(i=0; i < 8; i++){
-                printf("register[%d]=%d\n",i, m_core->v__DOT__register__DOT__registers[i]);
+                printf("register[%d]=%d\n",i, m_core->core__DOT__register__DOT__registers[i]);
             }
         }
 
         void await_completion() {
-            int lastState = m_core->v__DOT__state;
+            int lastState = m_core->core__DOT__state;
             dump_state();
 
-            while (lastState <= m_core->v__DOT__state) {
-                lastState = m_core->v__DOT__state;
+            while (lastState <= m_core->core__DOT__state) {
+                lastState = m_core->core__DOT__state;
                 
                 this->tick();
                 

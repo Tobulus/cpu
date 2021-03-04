@@ -30,10 +30,13 @@ begin: decoder
         begin
             O_immediate <= {I_instruction[11:9], I_instruction[2:0], 2'b00}; 
         end
-        else
+        else if(I_instruction[15:12] == LOAD || I_instruction[15:12] == JMP)
         begin
             O_immediate <= I_instruction[7:0];
         end
+	else begin
+		O_immediate <= {{3{I_instruction[4]}}, I_instruction[4:0]};
+	end
     end
 end
 endmodule

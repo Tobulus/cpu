@@ -19,7 +19,7 @@ begin: PC
             O_out <= I_in;
         end
         else begin
-            O_out <= O_out + 1;
+            O_out <= O_out + 2;
         end
     end
 end

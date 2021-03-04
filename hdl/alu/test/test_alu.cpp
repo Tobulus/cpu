@@ -327,7 +327,7 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
         void test_jmp() {
             m_core->I_enable = 1;
             m_core->I_opcode = 11;
-            m_core->I_opcode_mode = 1;
+            m_core->I_opcode_mode = 0;
             m_core->I_pc = 1;
             m_core->I_immediate = 5;
 
@@ -342,6 +342,23 @@ class Alu_Test_Bench: public TESTBENCH<Valu> {
             this->tick();
 
             ASSERT_EQ(m_core->O_out, 3);
+            
+	    m_core->I_opcode_mode = 1;
+            m_core->I_pc = 5;
+	    m_core->I_rA = 4;
+            m_core->I_immediate = -2;
+
+            this->tick();
+
+            ASSERT_EQ(m_core->O_out, 4);
+
+	    m_core->I_opcode_mode = 0;
+	    m_core->I_opcode = 0xC;
+	    m_core->I_rA = 1;
+
+	    this->tick();
+
+	    ASSERT_EQ(m_core->O_write_pc, 1);
         }
 
 };

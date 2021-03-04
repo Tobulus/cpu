@@ -41,7 +41,7 @@ begin: ALU
             if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
                 if (I_immediate[0] == 1) begin
-                    O_out <= $signed(I_rA) + $signed(I_immediate[4:1]);
+                    O_out <= $signed(I_rA) + $signed({{12{I_immediate[4]}}, I_immediate[4:1]});
                 end
                 else begin
                     O_out <= $signed(I_rA) + $signed(I_rB);
@@ -49,7 +49,7 @@ begin: ALU
             end
             else begin
                 if (I_immediate[0] == 1) begin
-                    O_out <= $unsigned(I_rA) + $unsigned(I_immediate[4:1]);
+                    O_out <= $unsigned(I_rA) + $unsigned({12'b0, I_immediate[4:1]});
                 end
                 else begin
                     O_out <= $unsigned(I_rA) + $unsigned(I_rB);
@@ -65,7 +65,7 @@ begin: ALU
             if (I_opcode_mode == OPCODE_MODE_SIGNED)
             begin
                 if (I_immediate[0] == 1) begin
-                    O_out <= $signed(I_rA) - $signed(I_immediate[4:1]);
+                    O_out <= $signed(I_rA) - $signed({{12{I_immediate[4]}}, I_immediate[4:1]});
                 end
                 else begin
                     O_out <= $signed(I_rA) - $signed(I_rB);
@@ -73,7 +73,7 @@ begin: ALU
             end
             else begin
                 if (I_immediate[0] == 1) begin
-                    O_out <= $unsigned(I_rA) - $unsigned(I_immediate[4:1]);
+                    O_out <= $unsigned(I_rA) - $signed({12'b0, I_immediate[4:1]});
                 end
                 else begin
                     O_out <= $unsigned(I_rA) - $unsigned(I_rB);
@@ -133,7 +133,7 @@ begin: ALU
         end
         else if (I_opcode == READ)
         begin
-            O_out <= $signed(I_rA) + $signed(I_immediate[4:0]);
+            O_out <= $signed(I_rA) + $signed({{11{I_immediate[4]}}, I_immediate[4:0]});
             O_write_pc <= 0;
             O_write_rD <= 1;
             O_memory_mode <= MEM_READ;
@@ -141,7 +141,7 @@ begin: ALU
         end
         else if (I_opcode == WRITE)
         begin
-            O_out <= $signed(I_rA) + $signed(I_immediate[4:0]);
+            O_out <= $signed(I_rA) + $signed({{11{I_immediate[4]}}, I_immediate[4:0]});
             O_write_pc <= 0;
             O_write_rD <= 0;
             O_memory_mode <= MEM_WRITE;
@@ -202,17 +202,11 @@ begin: ALU
         end
         else if (I_opcode == JMP)
         begin
-            if (I_opcode_mode == OPCODE_MODE_SIGNED) begin
-                // sign extend two's complement
-                if (I_immediate[7] == 1'b1) begin
-                    O_out <= $signed(I_pc) + $signed({{8{1'b1}}, I_immediate});
-                end
-                else begin
-                    O_out <= $signed(I_pc) + $signed({{8{1'b0}}, I_immediate});
-                end
+            if (I_opcode_mode == 0) begin
+		O_out <= $signed(I_pc) + $signed({{8{I_immediate[7]}}, I_immediate});
             end
             else begin
-                O_out <= I_pc + {{8{1'b0}}, I_immediate};
+                O_out <= I_rA;
             end
             O_write_pc <= 1;
             O_write_rD <= 0;
@@ -221,30 +215,30 @@ begin: ALU
         end
         else if (I_opcode == JMPC)
         begin
-            O_out <= I_rB;
+            O_out <= $signed(I_pc) + $signed({{8{I_immediate[4]}}, I_immediate});;
             O_memory_mode <= MEM_NOP;
             O_memory_size <= 1;
             O_write_rD <= 0;
 
             if (I_compare_code == CMP_CODE_EQ)
             begin
-                O_write_pc <= (I_rA & CMP_EQ_BIT) == 1 ? 1 : 0;
+                O_write_pc <= I_rA[CMP_EQ_BIT] == 1 ? 1 : 0;
             end
             else if(I_compare_code == CMP_CODE_RA_GT_RB)
             begin
-                O_write_pc <= (I_rA & CMP_RA_GT_RB_BIT) == 1 ? 1 : 0;
+                O_write_pc <= I_rA[CMP_RA_GT_RB_BIT] == 1 ? 1 : 0;
             end
             else if(I_compare_code == CMP_CODE_RB_GT_RA)
             begin
-                O_write_pc <= (I_rA & CMP_RB_GT_RA_BIT) == 1 ? 1 : 0;
+                O_write_pc <= I_rA[CMP_RB_GT_RA_BIT] == 1 ? 1 : 0;
             end
             else if(I_compare_code == CMP_CODE_RA_ZERO)
             begin
-                O_write_pc <= (I_rA & CMP_RA_ZERO_BIT) == 1 ? 1 : 0;
+                O_write_pc <= I_rA[CMP_RA_ZERO_BIT] == 1 ? 1 : 0;
             end
             else if(I_compare_code == CMP_CODE_RB_ZERO)
             begin
-                O_write_pc <= (I_rA & CMP_RB_ZERO_BIT) == 1 ? 1 : 0;
+                O_write_pc <= I_rA[CMP_RB_ZERO_BIT] == 1 ? 1 : 0;
             end
         end
         else if(I_opcode == SPC)
