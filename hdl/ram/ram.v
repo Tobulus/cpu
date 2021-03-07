@@ -62,8 +62,14 @@ initial begin
 	mem[43] = 'h09;
 	mem[44] = 'he4;
 	mem[45] = 'hb0;
-	mem[46] = 'h10;
-	mem[47] = 'hc6;
+	mem[46] = 'h00;
+	mem[47] = 'h90;
+	mem[48] = 'h64;
+	mem[49] = 'h88;
+	mem[50] = 'h00;
+	mem[51] = 'h89;
+	mem[52] = 'h10;
+	mem[53] = 'hc6;
 end
 
 always @(posedge I_clk)

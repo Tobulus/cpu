@@ -25,4 +25,7 @@ write.b r4, r2
 addi.u r4, r4, 1
 bi $UART_POLL
 START:
+cmp r0, r0, r0
+load.l r4, 100
+load.h r4, 0
 br.az r0, r4

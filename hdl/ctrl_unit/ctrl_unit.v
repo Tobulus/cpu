@@ -17,6 +17,7 @@ reg[5:0] O_state;
 reg O_execute;
 
 reg mem_wait = 0;
+reg[3:0] instr;
 
 always @(posedge I_clk)
 begin: CTRL_UNIT
@@ -37,6 +38,7 @@ begin: CTRL_UNIT
             O_execute <= 0;
             if (I_data_ready == 1)
             begin
+		instr <= I_instruction[15:12];
                 mem_wait <= 0;
                 O_state <= 6'b000010;
             end
@@ -55,7 +57,7 @@ begin: CTRL_UNIT
     else if (O_state == 6'b001000)
     begin
         // execute
-        if (I_instruction[15:12] == WRITE || I_instruction[15:12] == READ)
+        if (instr == WRITE || instr == READ)
         begin
             if (I_mem_ready == 1 && mem_wait == 0)
             begin
@@ -80,7 +82,7 @@ begin: CTRL_UNIT
         else if (mem_wait == 1)
         begin
             O_execute <= 0;
-            if (I_instruction[15:12] == WRITE || I_data_ready == 1)
+            if ((instr == WRITE && I_mem_ready == 1) || (instr == READ && I_data_ready == 1))
             begin
                 mem_wait <= 0;
                 O_state <= 6'b100000;

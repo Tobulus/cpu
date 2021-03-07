@@ -215,7 +215,13 @@ begin: ALU
         end
         else if (I_opcode == JMPC)
         begin
-            O_out <= $signed(I_pc) + $signed({{8{I_immediate[4]}}, I_immediate});;
+	    if (I_opcode_mode == 1) begin
+            	O_out <= $signed(I_pc) + $signed({{8{I_immediate[4]}}, I_immediate});
+            end
+	    else begin
+            	O_out <= I_rB;
+	    end
+
             O_memory_mode <= MEM_NOP;
             O_memory_size <= 1;
             O_write_rD <= 0;
