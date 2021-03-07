@@ -21,13 +21,13 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 		rx->I_reset = 0;
 
 		/* assemble the multiplication test program */
-		printf("before assemble\n");
+		//printf("before assemble\n");
 		system("python3.8 ../../assembler/assembler.py --input test/mult.asm --output test/mult.bin");
 		std::ifstream file;
 		std::array<char, 1> bytes;
-		printf("before open\n");
+		//printf("before open\n");
 		file.open("test/mult.bin", std::ifstream::in | std::ios::binary);
-		printf("after open\n");
+		//printf("after open\n");
 		m_core->I_reset = 1;
 		this->tick();
 		m_core->I_reset = 0;
@@ -35,7 +35,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 		
 		// send the program
 		while (file.read(bytes.data(), bytes.size())) {
-			printf("fetch instr to send...\n");
+			//printf("fetch instr to send...\n");
 			tx->I_exec = 0;
 			
 			tx->I_clk = 0;
@@ -61,7 +61,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
 			tx->I_data = bytes.at(0);
 			tx->I_exec = 1;
-			printf("try to send %d\n", bytes.at(0));
+			//printf("try to send %d\n", bytes.at(0));
 
 			tx->I_clk = 0;
 			tx->eval();
@@ -73,7 +73,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
 			// send one byte
 			while (!tx->O_ready) {
-				printf("sending byte\n");
+				//printf("sending byte\n");
 				tx->I_clk = 0;
 				tx->eval();
 				tx->I_clk = 1;
@@ -82,14 +82,108 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 				tx->eval();
 
 				this->tick();
-				printf("setting UART_rx_in_data to %d\n", tx->O_data);
+				//printf("setting UART_rx_in_data to %d\n", tx->O_data);
 				m_core->UART_rx_in_data = tx->O_data; 
 			}
 		}
-	
 		file.close();
 
+		printf("send finish command to the bootloader");
+		tx->I_data = 255;
+		tx->I_exec = 1;
+
+		// first 'end' byte -> 0xFF
+		tx->I_clk = 0;
+		tx->eval();
+		tx->I_clk = 1;
+		tx->eval();
+		tx->I_clk = 0;
+		tx->eval();
+		this->tick();
+
+		while (!tx->O_ready) {
+			printf("sending byte\n");
+			tx->I_clk = 0;
+			tx->eval();
+			tx->I_clk = 1;
+			tx->eval();
+			tx->I_clk = 0;
+			tx->eval();
+
+			this->tick();
+			m_core->UART_rx_in_data = tx->O_data; 
+		}
+
+		printf("send second 'end' byte");
+		tx->I_data = 255;
+		tx->I_exec = 1;
+
+		// second 'end' byte -> 0xFF
+		tx->I_clk = 0;
+		tx->eval();
+		tx->I_clk = 1;
+		tx->eval();
+		tx->I_clk = 0;
+		tx->eval();
+		this->tick();
+		printf("internal buffer=%d", tx->uart_tx__DOT__buffer);
+		while (!tx->O_ready) {
+			printf("sending byte\n");
+			fflush(stdout);
+			tx->I_clk = 0;
+			tx->eval();
+			tx->I_clk = 1;
+			tx->eval();
+			tx->I_clk = 0;
+			tx->eval();
+
+			this->tick();
+			printf("tx state=%d", tx->uart_tx__DOT__state);
+			printf("rx state=%d", m_core->system__DOT__uart_rx__DOT__state);
+			printf("out=%d", tx->O_data);
+			printf("tx-clkcount=%d", tx->uart_tx__DOT__clk_count);
+			printf("rx-clkcount=%d", m_core->system__DOT__uart_rx__DOT__clk_count);
+			m_core->UART_rx_in_data = tx->O_data; 
+		}
+		tx->I_clk = 0;
+		tx->eval();
+		tx->I_clk = 1;
+		tx->eval();
+		tx->I_clk = 0;
+		tx->eval();
+		this->tick();
+		while (!tx->O_ready) {
+			printf("sending byte\n");
+			fflush(stdout);
+			tx->I_clk = 0;
+			tx->eval();
+			tx->I_clk = 1;
+			tx->eval();
+			tx->I_clk = 0;
+			tx->eval();
+
+			this->tick();
+			printf("tx state=%d", tx->uart_tx__DOT__state);
+			printf("rx state=%d", m_core->system__DOT__uart_rx__DOT__state);
+			printf("out=%d", tx->O_data);
+			printf("tx-clkcount=%d", tx->uart_tx__DOT__clk_count);
+			printf("rx-clkcount=%d", m_core->system__DOT__uart_rx__DOT__clk_count);
+			m_core->UART_rx_in_data = tx->O_data; 
+		}
+
+		printf("finished send end command");
+		fflush(stdout);
+		tx->I_exec = 0;
+
+		tx->I_clk = 0;
+		tx->eval();
+		tx->I_clk = 1;
+		tx->eval();
+		tx->I_clk = 0;
+		tx->eval();
+		this->tick();
 		printf("wait for completion of mult()...");
+		fflush(stdout);
 		// wait for the completion and check the result
 		while (!rx->O_data_ready) {	
 			rx->I_clk = 0;

@@ -10,6 +10,7 @@ module core(input I_clk,
 output MEM_data_out);
 
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
+wire[1:0] rD_write_pos;
 reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
 reg[1:0] memory_mode, memory_size, alu_memory_size, MEM_size;
 reg[2:0] rD_select, rA_select, rB_select;
@@ -49,6 +50,7 @@ decoder decoder(.I_clk(I_clk),
     .I_instruction(instruction),
     .O_opcode(opcode),
     .O_rD_select(rD_select),
+    .O_rD_write_pos(rD_write_pos),
     .O_rA_select(rA_select),
     .O_rB_select(rB_select),
     .O_immediate(immediate),
@@ -78,6 +80,7 @@ register register(.I_clk(I_clk),
     .I_enable(register_enable),
     .I_rD_write(write_rD),
     .I_rD_select(rD_select),
+    .I_rD_write_pos(rD_write_pos),
     .I_rA_select(rA_select),
     .I_rB_select(rB_select),
     .O_rA_out(rA_out),
@@ -103,8 +106,14 @@ begin
     mem_addr = mem_enable ? alu_out : pc_out;
     mem_data_in = rB_out;
     write_rD = state[5] && alu_write_rD;
-    register_in = state[4] ? mem_data_out : alu_out;
     memory_size = state[0] ? 2 : alu_memory_size;
+    
+    if (memory_mode == MEM_READ) begin
+	    register_in = mem_data_out;
+    end
+    else begin
+	    register_in = alu_out;
+    end
 
     if (mem_enable && memory_mode == MEM_WRITE)
     begin

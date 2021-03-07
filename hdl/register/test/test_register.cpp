@@ -10,7 +10,8 @@ class Register_Test_Bench: public TESTBENCH<Vregister> {
             int i;
 
             m_core->I_enable = 1;
-            
+            m_core->I_rD_write_pos = 0;
+
             this->reset();
 
             for (i = 0; i < 8; i++) {

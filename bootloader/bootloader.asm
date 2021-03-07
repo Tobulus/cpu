@@ -16,6 +16,7 @@ cmp r5, r6, r2
 not r5, r5
 bro.eq r5, $CONTINUE
 load.l r5, 255
+load.h r5, 0
 cmp r3, r5, r2
 bro.eq r3, $START
 CONTINUE:
