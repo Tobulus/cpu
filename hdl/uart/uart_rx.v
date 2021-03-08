@@ -3,7 +3,7 @@ module uart_rx
 (input I_clk, 
     input I_reset,
     input I_data_bit,
-    output O_ready, // TODO:sense?
+    output O_ready,
     output O_data_ready,
 output O_data);
 

@@ -22,11 +22,11 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
 		/* assemble the multiplication test program */
 		//printf("before assemble\n");
-		system("python3.8 ../../assembler/assembler.py --input test/mult.asm --output test/mult.bin");
+		system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
 		std::ifstream file;
 		std::array<char, 1> bytes;
 		//printf("before open\n");
-		file.open("test/mult.bin", std::ifstream::in | std::ios::binary);
+		file.open("test/add.bin", std::ifstream::in | std::ios::binary);
 		//printf("after open\n");
 		m_core->I_reset = 1;
 		this->tick();
@@ -182,7 +182,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 		tx->I_clk = 0;
 		tx->eval();
 		this->tick();
-		printf("wait for completion of mult()...");
+		printf("wait for completion of add()...");
 		fflush(stdout);
 		// wait for the completion and check the result
 		while (!rx->O_data_ready) {	
@@ -197,8 +197,8 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 			rx->I_data_bit = m_core->UART_tx_out_data;
 		}
 		
-		// mult(3,4) == 12
-		ASSERT_EQ(rx->O_data, 12);
+		// add(1,2) == 3
+		ASSERT_EQ(rx->O_data, 3);
         }
 };
 
