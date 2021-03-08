@@ -16,7 +16,7 @@ module alu(input I_clk,
     output O_write_rD,
     output O_write_pc,
     output O_memory_size,
-output O_memory_mode);
+    output O_memory_mode);
 
 reg[3:0] I_opcode;
 reg[2:0] I_compare_code;
@@ -203,7 +203,7 @@ begin: ALU
         else if (I_opcode == JMP)
         begin
             if (I_opcode_mode == 0) begin
-		O_out <= $signed(I_pc) + $signed({{8{I_immediate[7]}}, I_immediate});
+                O_out <= $signed(I_pc) + $signed({{8{I_immediate[7]}}, I_immediate});
             end
             else begin
                 O_out <= I_rA;
@@ -215,12 +215,12 @@ begin: ALU
         end
         else if (I_opcode == JMPC)
         begin
-	    if (I_opcode_mode == 1) begin
-            	O_out <= $signed(I_pc) + $signed({{8{I_immediate[4]}}, I_immediate});
+            if (I_opcode_mode == 1) begin
+                O_out <= $signed(I_pc) + $signed({{8{I_immediate[4]}}, I_immediate});
             end
-	    else begin
-            	O_out <= I_rB;
-	    end
+            else begin
+                O_out <= I_rB;
+            end
 
             O_memory_mode <= MEM_NOP;
             O_memory_size <= 1;

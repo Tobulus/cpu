@@ -5,9 +5,9 @@ module core(input I_clk,
     input MEM_data_ready,
     output MEM_exec, 
     output MEM_write,
-   output MEM_size, 
+    output MEM_size, 
     output MEM_addr, 
-output MEM_data_out);
+    output MEM_data_out);
 
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
 wire[1:0] rD_write_pos;
@@ -34,7 +34,7 @@ alu alu(.I_clk(I_clk),
     .O_memory_size(alu_memory_size),
     .O_out(alu_out),
     .O_write_rD(alu_write_rD),
-.O_write_pc(pc_write));
+    .O_write_pc(pc_write));
 
 ctrl_unit ctrl_unit(.I_clk(I_clk),
     .I_reset(I_reset), 
@@ -42,7 +42,7 @@ ctrl_unit ctrl_unit(.I_clk(I_clk),
     .I_mem_ready(mem_ready),
     .I_data_ready(mem_data_ready),
     .O_state(state),
-.O_execute(mem_execute));
+    .O_execute(mem_execute));
 
 decoder decoder(.I_clk(I_clk), 
     .I_reset(I_reset), 
@@ -54,7 +54,7 @@ decoder decoder(.I_clk(I_clk),
     .O_rA_select(rA_select),
     .O_rB_select(rB_select),
     .O_immediate(immediate),
-.O_mode(mode));
+    .O_mode(mode));
 
 mem_ctrl mem_ctrl(.I_clk(I_clk), 
     .I_reset(I_reset), 
@@ -73,7 +73,7 @@ mem_ctrl mem_ctrl(.I_clk(I_clk),
     .MEM_addr(MEM_addr),
     .MEM_data_out(MEM_data_out),
     .MEM_data_in(MEM_data_in),
-.MEM_data_ready(MEM_data_ready));
+    .MEM_data_ready(MEM_data_ready));
 
 register register(.I_clk(I_clk), 
     .I_reset(I_reset), 
@@ -85,14 +85,14 @@ register register(.I_clk(I_clk),
     .I_rB_select(rB_select),
     .O_rA_out(rA_out),
     .O_rB_out(rB_out),
-.I_rD_in(register_in));
+    .I_rD_in(register_in));
 
 pc pc(.I_clk(I_clk),
     .I_reset(I_reset), 
     .I_in(pc_in),
     .I_enable(pc_enable),
     .I_write(pc_write),
-.O_out(pc_out));
+    .O_out(pc_out));
 
 always @(*)
 begin
@@ -107,12 +107,12 @@ begin
     mem_data_in = rB_out;
     write_rD = state[5] && alu_write_rD;
     memory_size = state[0] ? 2 : alu_memory_size;
-    
+
     if (memory_mode == MEM_READ) begin
-	    register_in = mem_data_out;
+        register_in = mem_data_out;
     end
     else begin
-	    register_in = alu_out;
+        register_in = alu_out;
     end
 
     if (mem_enable && memory_mode == MEM_WRITE)

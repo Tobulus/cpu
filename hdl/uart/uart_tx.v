@@ -5,7 +5,7 @@ module uart_tx
     input I_data,
     input I_exec,
     output O_ready,
-output O_data);
+    output O_data);
 
 reg O_data;
 reg[7:0] I_data, buffer, clk_count;

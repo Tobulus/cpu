@@ -15,7 +15,7 @@ module mem_ctrl(input I_clk,
     output MEM_size,
     output MEM_data_out,
     input MEM_data_in,
-input MEM_data_ready);
+    input MEM_data_ready);
 
 wire[1:0] I_size;
 wire[15:0] I_addr, I_data, MEM_data_in;

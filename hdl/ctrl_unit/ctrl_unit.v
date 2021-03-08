@@ -6,7 +6,7 @@ module ctrl_unit(I_clk,
     I_mem_ready,
     I_data_ready,
     O_state,
-O_execute);
+    O_execute);
 
 /* verilator lint_off UNUSED */
 input I_clk, I_instruction, I_mem_ready, I_data_ready, I_reset;
@@ -38,7 +38,7 @@ begin: CTRL_UNIT
             O_execute <= 0;
             if (I_data_ready == 1)
             begin
-		instr <= I_instruction[15:12];
+                instr <= I_instruction[15:12];
                 mem_wait <= 0;
                 O_state <= 6'b000010;
             end

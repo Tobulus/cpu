@@ -5,7 +5,7 @@ module uart_rx
     input I_data_bit,
     output O_ready,
     output O_data_ready,
-output O_data);
+    output O_data);
 
 reg O_data_ready, O_ready;
 reg[7:0] O_data, buffer, clk_count;
