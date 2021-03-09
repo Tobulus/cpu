@@ -2,7 +2,7 @@ import os
 
 def next(f):
     a = int.from_bytes(f.read(2), 'little')
-    print (a)
+    #print (a)
     return a
 
 os.system('python3.8 ../assembler.py --input test.asm --output test_run')
@@ -44,13 +44,14 @@ with open('test_run', 'rb') as f:
     assert next(f) == int('0b1000001100000001', 2)
     #cmp
     assert next(f) == int('0b1001011001000100', 2)
+    assert next(f) == int('0b1001101011001000', 2)
     #shift
     assert next(f) == int('0b1010010000100001', 2)
     assert next(f) == int('0b1010010100100001', 2)
     #branch
-    assert next(f) == int('0b1011000000000010', 2)
+    assert next(f) == int('0b1011000011111110', 2)
     assert next(f) == int('0b1100000001000100', 2)
-    assert next(f) == int('0b1100001000000001', 2)
+    assert next(f) == int('0b1100001100111010', 2)
 print("Success!")
 
 os.system('rm test_run')
