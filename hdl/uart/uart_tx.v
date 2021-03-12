@@ -28,6 +28,7 @@ begin: uart_tx
             O_data <= 1;
             if (I_exec == 1) begin
                 buffer <= I_data;
+                O_ready <= 0;
                 state <= 1;
                 clk_count <= 0;
             end
@@ -35,7 +36,6 @@ begin: uart_tx
         // Start-Bit
         else if (state == 1) begin
             clk_count <= clk_count + 1;
-            O_ready <= 0;
             O_data <= 0;
             if (clk_count >= CLKS_PER_BIT) begin
                 state <= 2;

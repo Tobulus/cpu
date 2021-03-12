@@ -7,198 +7,96 @@
 #include "testbench.h"
 
 class System_Test_Bench: public TESTBENCH<Vsystem> {
-    
+
     public:
-    
-        void test() {
-		Vuart_tx* tx = new Vuart_tx;
-		Vuart_rx* rx = new Vuart_rx;
-		tx->I_reset = 1;
-		rx->I_reset = 1;
-		tx->eval();
-		rx->eval();
-		tx->I_reset = 0;
-		rx->I_reset = 0;
+        void tx_tick(Vuart_tx* tx) {
+            tx->I_clk = 0;
+            tx->eval();
+            tx->I_clk = 1;
+            tx->eval();
+            tx->I_clk = 0;
+            tx->eval();
+        }
 
-		/* assemble the multiplication test program */
-		//printf("before assemble\n");
-		system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
-		std::ifstream file;
-		std::array<char, 1> bytes;
-		//printf("before open\n");
-		file.open("test/add.bin", std::ifstream::in | std::ios::binary);
-		//printf("after open\n");
-		m_core->I_reset = 1;
-		this->tick();
-		m_core->I_reset = 0;
-		this->tick();
-		
-		// send the program
-		while (file.read(bytes.data(), bytes.size())) {
-			//printf("fetch instr to send...\n");
-			tx->I_exec = 0;
-			
-			tx->I_clk = 0;
-			tx->eval();
-			tx->I_clk = 1;
-			tx->eval();
-			tx->I_clk = 0;
-			tx->eval();
-			
-			this->tick();
+        void rx_tick(Vuart_rx* rx) {
+            rx->I_clk = 0;
+            rx->eval();
+            rx->I_clk = 1;
+            rx->eval();
+            rx->I_clk = 0;
+            rx->eval();
+        }
 
-			/*while (!m_core->UART_rx_ready) {
-				printf("waiting for rx ready\n");
-				tx->I_clk = 0;
-				tx->eval();
-				tx->I_clk = 1;
-				tx->eval();
-				tx->I_clk = 0;
-				tx->eval();
+        void transfer_byte(Vuart_tx* tx, uint8_t byte) {
+            tx->I_exec = 0;
 
-				this->tick();
-			}*/
+            tx_tick(tx);
+            this->tick();
 
-			tx->I_data = bytes.at(0);
-			tx->I_exec = 1;
-			//printf("try to send %d\n", bytes.at(0));
+            tx->I_data = byte;
+            tx->I_exec = 1;
 
-			tx->I_clk = 0;
-			tx->eval();
-			tx->I_clk = 1;
-			tx->eval();
-			tx->I_clk = 0;
-			tx->eval();
-			this->tick();
+            tx_tick(tx);
+            this->tick();
+            
+            tx->I_exec = 0;
 
-			// send one byte
-			while (!tx->O_ready) {
-				//printf("sending byte\n");
-				tx->I_clk = 0;
-				tx->eval();
-				tx->I_clk = 1;
-				tx->eval();
-				tx->I_clk = 0;
-				tx->eval();
+            /* send one byte */
+            while (!tx->O_ready) {
+                tx_tick(tx);
+                this->tick();
+                m_core->UART_rx_in_data = tx->O_data; 
+            }
+        }
 
-				this->tick();
-				//printf("setting UART_rx_in_data to %d\n", tx->O_data);
-				m_core->UART_rx_in_data = tx->O_data; 
-			}
-		}
-		file.close();
+        void test_add() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
 
-		printf("send finish command to the bootloader");
-		tx->I_data = 255;
-		tx->I_exec = 1;
+            /* reset UARTs */
+            tx->I_reset = 1;
+            rx->I_reset = 1;
+            rx_tick(rx);
+            tx_tick(tx);
+            tx->I_reset = 0;
+            rx->I_reset = 0;
 
-		// first 'end' byte -> 0xFF
-		tx->I_clk = 0;
-		tx->eval();
-		tx->I_clk = 1;
-		tx->eval();
-		tx->I_clk = 0;
-		tx->eval();
-		this->tick();
+            /* assemble the multiplication test program */
+            system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
 
-		while (!tx->O_ready) {
-			printf("sending byte\n");
-			tx->I_clk = 0;
-			tx->eval();
-			tx->I_clk = 1;
-			tx->eval();
-			tx->I_clk = 0;
-			tx->eval();
+            std::ifstream file;
+            std::array<char, 1> bytes;
+            file.open("test/add.bin", std::ifstream::in | std::ios::binary);
+            m_core->I_reset = 1;
+            this->tick();
+            m_core->I_reset = 0;
+            this->tick();
 
-			this->tick();
-			m_core->UART_rx_in_data = tx->O_data; 
-		}
+            /* read the binary test program and send it via the UART to the RAM */
+            while (file.read(bytes.data(), bytes.size())) {
+                transfer_byte(tx, bytes.at(0));
+            }
 
-		printf("send second 'end' byte");
-		tx->I_data = 255;
-		tx->I_exec = 1;
+            file.close();
 
-		// second 'end' byte -> 0xFF
-		tx->I_clk = 0;
-		tx->eval();
-		tx->I_clk = 1;
-		tx->eval();
-		tx->I_clk = 0;
-		tx->eval();
-		this->tick();
-		printf("internal buffer=%d", tx->uart_tx__DOT__buffer);
-		while (!tx->O_ready) {
-			printf("sending byte\n");
-			fflush(stdout);
-			tx->I_clk = 0;
-			tx->eval();
-			tx->I_clk = 1;
-			tx->eval();
-			tx->I_clk = 0;
-			tx->eval();
+            /* program is transfered - now tell the bootloader to jump to the
+             * beginning of the transfered executable by sending two times 0xFF */
 
-			this->tick();
-			printf("tx state=%d", tx->uart_tx__DOT__state);
-			printf("rx state=%d", m_core->system__DOT__uart_rx__DOT__state);
-			printf("out=%d", tx->O_data);
-			printf("tx-clkcount=%d", tx->uart_tx__DOT__clk_count);
-			printf("rx-clkcount=%d", m_core->system__DOT__uart_rx__DOT__clk_count);
-			m_core->UART_rx_in_data = tx->O_data; 
-		}
-		tx->I_clk = 0;
-		tx->eval();
-		tx->I_clk = 1;
-		tx->eval();
-		tx->I_clk = 0;
-		tx->eval();
-		this->tick();
-		while (!tx->O_ready) {
-			printf("sending byte\n");
-			fflush(stdout);
-			tx->I_clk = 0;
-			tx->eval();
-			tx->I_clk = 1;
-			tx->eval();
-			tx->I_clk = 0;
-			tx->eval();
+            transfer_byte(tx, 0xFF);
+            transfer_byte(tx, 0xFF);
 
-			this->tick();
-			printf("tx state=%d", tx->uart_tx__DOT__state);
-			printf("rx state=%d", m_core->system__DOT__uart_rx__DOT__state);
-			printf("out=%d", tx->O_data);
-			printf("tx-clkcount=%d", tx->uart_tx__DOT__clk_count);
-			printf("rx-clkcount=%d", m_core->system__DOT__uart_rx__DOT__clk_count);
-			m_core->UART_rx_in_data = tx->O_data; 
-		}
+            printf("wait for completion of test program...");
+            fflush(stdout);
 
-		printf("finished send end command");
-		fflush(stdout);
-		tx->I_exec = 0;
+            /* wait for the completion and check the result which was received via UART */
+            while (!rx->O_data_ready) {
+                rx_tick(rx);    
+                this->tick();
+                rx->I_data_bit = m_core->UART_tx_out_data;
+            }
 
-		tx->I_clk = 0;
-		tx->eval();
-		tx->I_clk = 1;
-		tx->eval();
-		tx->I_clk = 0;
-		tx->eval();
-		this->tick();
-		printf("wait for completion of add()...");
-		fflush(stdout);
-		// wait for the completion and check the result
-		while (!rx->O_data_ready) {	
-			rx->I_clk = 0;
-			rx->eval();
-			rx->I_clk = 1;
-			rx->eval();
-			rx->I_clk = 0;
-			rx->eval();
-			this->tick();
-
-			rx->I_data_bit = m_core->UART_tx_out_data;
-		}
-		
-		// add(1,2) == 3
-		ASSERT_EQ(rx->O_data, 3);
+            /* add(1,2) == 3 */
+            ASSERT_EQ(rx->O_data, 3);
         }
 };
 
@@ -207,7 +105,7 @@ int main(int argc, char** argv, char** env) {
     System_Test_Bench *bench = new System_Test_Bench;
     bench->opentrace("trace.vcd");
 
-    bench->test();
+    bench->test_add();
 
     printf("Success!\n");
 
