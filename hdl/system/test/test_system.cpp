@@ -85,7 +85,59 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             transfer_byte(tx, 0xFF);
             transfer_byte(tx, 0xFF);
 
-            printf("wait for completion of test program...");
+            printf("wait for completion of test program...\n");
+            fflush(stdout);
+
+            /* wait for the completion and check the result which was received via UART */
+            while (!rx->O_data_ready) {
+                rx_tick(rx);    
+                this->tick();
+                rx->I_data_bit = m_core->UART_tx_out_data;
+            }
+            
+            printf("Done.\n");
+
+            /* add(1,2) == 3 */
+            ASSERT_EQ(rx->O_data, 3);
+        }
+        
+        void test_mult() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
+
+            /* reset UARTs */
+            tx->I_reset = 1;
+            rx->I_reset = 1;
+            rx_tick(rx);
+            tx_tick(tx);
+            tx->I_reset = 0;
+            rx->I_reset = 0;
+
+            /* assemble the multiplication test program */
+            system("python3.8 ../../assembler/assembler.py --input test/mult.asm --output test/mult.bin");
+
+            std::ifstream file;
+            std::array<char, 1> bytes;
+            file.open("test/mult.bin", std::ifstream::in | std::ios::binary);
+            m_core->I_reset = 1;
+            this->tick();
+            m_core->I_reset = 0;
+            this->tick();
+
+            /* read the binary test program and send it via the UART to the RAM */
+            while (file.read(bytes.data(), bytes.size())) {
+                transfer_byte(tx, bytes.at(0));
+            }
+
+            file.close();
+
+            /* program is transfered - now tell the bootloader to jump to the
+             * beginning of the transfered executable by sending two times 0xFF */
+
+            transfer_byte(tx, 0xFF);
+            transfer_byte(tx, 0xFF);
+
+            printf("wait for completion of test program...\n");
             fflush(stdout);
 
             /* wait for the completion and check the result which was received via UART */
@@ -95,8 +147,10 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
                 rx->I_data_bit = m_core->UART_tx_out_data;
             }
 
-            /* add(1,2) == 3 */
-            ASSERT_EQ(rx->O_data, 3);
+            printf("Done.\n");
+
+            /* mult(3,4) == 12 */
+            ASSERT_EQ(rx->O_data, 12);
         }
 };
 
@@ -105,7 +159,8 @@ int main(int argc, char** argv, char** env) {
     System_Test_Bench *bench = new System_Test_Bench;
     bench->opentrace("trace.vcd");
 
-    bench->test_add();
+    //bench->test_add();
+    bench->test_mult();
 
     printf("Success!\n");
 

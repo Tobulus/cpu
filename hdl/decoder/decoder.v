@@ -30,7 +30,7 @@ begin: decoder
 
         if (I_instruction[15:12] == WRITE)
         begin
-            O_immediate <= {I_instruction[11:9], I_instruction[2:0], 2'b00}; 
+            O_immediate <= {{3{I_instruction[11]}}, I_instruction[11:9], I_instruction[1:0]}; 
 		    O_rD_write_pos <= 0;
         end
         else if(I_instruction[15:12] == LOAD || I_instruction[15:12] == JMP)

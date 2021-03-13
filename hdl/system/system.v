@@ -102,12 +102,6 @@ begin: system
         ram_enable <= 0;
     end
     else if (state == 3) begin
-        //if (mem_write == 1) begin
-        //	ram_data_in <= mem_data_out;
-        //end    
-        //else begin
-        //	mem_data_in <= ram_data_out;
-        //end
         if (mem_write == 0) begin
             mem_data_in <= ram_data_out;
         end

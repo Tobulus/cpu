@@ -12,6 +12,7 @@ from ops.op_shift import op_shift
 from ops.op_mem_read import op_mem_read
 from ops.op_mem_write import op_mem_write
 from ops.op_branch import op_branch
+from ops.op_spc import op_spc
 
 LABEL   = "(\w+):"
 
@@ -48,6 +49,7 @@ handlers += [op_branch(False, op_branch.MODE_LT)]
 handlers += [op_branch(False, op_branch.MODE_GT)]
 handlers += [op_branch(False, op_branch.MODE_AZ)]
 handlers += [op_branch(False, op_branch.MODE_BZ)]
+handlers += [op_spc()]
 
 for handler in handlers:
     op_handlers[handler.get_op()] = handler
@@ -65,7 +67,6 @@ with open(options.input_file) as f:
             labels[match.group(1)] = pos
         else:
             pos += 2
-    print(labels)
 
     # parse instructions
     pos = 0

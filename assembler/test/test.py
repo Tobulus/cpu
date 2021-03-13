@@ -52,6 +52,8 @@ with open('test_run', 'rb') as f:
     assert next(f) == int('0b1011000011111110', 2)
     assert next(f) == int('0b1100000001000100', 2)
     assert next(f) == int('0b1100001100111010', 2)
+    #spc
+    assert next(f) == int('0b1101010000000000', 2)
 print("Success!")
 
 os.system('rm test_run')

@@ -31,3 +31,4 @@ shiftr r2, r1, 1
 br $TEST
 br.eq r2, r1
 br.gt r1, $TEST
+spc r2
