@@ -17,60 +17,7 @@ module ram(input I_clk,
 
     // bootloader
     initial begin
-        mem[0] =  'h00;
-        mem[1] =  'h80;
-        mem[2] =  'h00;
-        mem[3] =  'h8c;
-        mem[4] =  'h01;
-        mem[5] =  'h82;
-        mem[6] =  'h04;
-        mem[7] =  'h83;
-        mem[8] =  'h00;
-        mem[9] =  'h8e;
-        mem[10] = 'h04;
-        mem[11] = 'h8f;
-        mem[12] = 'h64;
-        mem[13] = 'h88;
-        mem[14] = 'h00;
-        mem[15] = 'h89;
-        mem[16] = 'h20;
-        mem[17] = 'h64;
-        mem[18] = 'h40;
-        mem[19] = 'h96;
-        mem[20] = 'h7c;
-        mem[21] = 'hc1;
-        mem[22] = 'he0;
-        mem[23] = 'h64;
-        mem[24] = 'hc8;
-        mem[25] = 'h9a;
-        mem[26] = 'ha0;
-        mem[27] = 'h5a;
-        mem[28] = 'haa;
-        mem[29] = 'hc1;
-        mem[30] = 'hff;
-        mem[31] = 'h8a;
-        mem[32] = 'h00;
-        mem[33] = 'h8b;
-        mem[34] = 'ha8;
-        mem[35] = 'h96;
-        mem[36] = 'h6a;
-        mem[37] = 'hc1;
-        mem[38] = 'h41;
-        mem[39] = 'h0d;
-        mem[40] = 'h88;
-        mem[41] = 'h70;
-        mem[42] = 'h83;
-        mem[43] = 'h09;
-        mem[44] = 'he4;
-        mem[45] = 'hb0;
-        mem[46] = 'h00;
-        mem[47] = 'h90;
-        mem[48] = 'h64;
-        mem[49] = 'h88;
-        mem[50] = 'h00;
-        mem[51] = 'h89;
-        mem[52] = 'h10;
-        mem[53] = 'hc6;
+        $readmemh("../../bootloader/bootloader.hex", mem);
     end
 
     always @(posedge I_clk)

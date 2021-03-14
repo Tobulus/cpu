@@ -18,6 +18,7 @@ LABEL   = "(\w+):"
 
 optparser = OptionParser()
 optparser.add_option("--ascii", action="store_true", dest="ascii")
+optparser.add_option("--hex", action="store_true", dest="hex")
 optparser.add_option("--input", action="store", type="string", dest="input_file")
 optparser.add_option("--output", action="store", type="string", dest="output_file")
 (options, args) = optparser.parse_args(sys.argv)
@@ -84,7 +85,14 @@ with open(options.input_file) as f:
 if options.ascii:
     with open(options.output_file, 'w') as f:
         for op in output:
-            f.write(str(op) + '\n');
+            if options.hex:
+                # four character hex digit
+                val = "{0:0{1}x}".format(op, 4)
+                # switch byte ordering
+                formatted = val[2:4] + ' ' + val[0:2]
+                f.write(formatted + '\n');
+            else:
+                f.write(str(op) + '\n');
 else:
     with open(options.output_file, 'wb') as f:
         for op in output:
