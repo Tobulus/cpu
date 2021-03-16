@@ -15,11 +15,6 @@ module ram(input I_clk,
 
     reg[7:0] mem [2048:0];
 
-    // bootloader
-    initial begin
-        $readmemh("../../bootloader/bootloader.hex", mem);
-    end
-
     always @(posedge I_clk)
     begin: ram
         if (I_enable == 1 && I_reset == 0)

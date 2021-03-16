@@ -8,24 +8,6 @@ class Ram_Test_Bench: public TESTBENCH<Vram> {
         void test_ram() {
             m_core->I_enable = 1;
 
-            // read one byte from the bootloader
-            m_core->I_size = 2;
-            m_core->I_write = 0;
-            m_core->I_addr = 0;
-
-            this->tick();
-
-            ASSERT_EQ(m_core->O_data_out, 0x8000);
-
-            // read one byte from the bootloader
-            m_core->I_size = 2;
-            m_core->I_write = 0;
-            m_core->I_addr = 2;
-
-            this->tick();
-
-            ASSERT_EQ(m_core->O_data_out, 0x8c00);
-
             // write one byte
             m_core->I_size = 1;
             m_core->I_write = 1;
