@@ -1,20 +1,13 @@
 `include "../alu/ops.vh"
 
-module ctrl_unit(I_clk, 
-    I_reset,
-    I_instruction,
-    I_mem_ready,
-    I_data_ready,
-    O_state,
-    O_execute);
-
-/* verilator lint_off UNUSED */
-input I_clk, I_instruction, I_mem_ready, I_data_ready, I_reset;
-output O_state, O_execute;
-
-reg[15:0] I_instruction;
-reg[5:0] O_state;
-reg O_execute;
+module ctrl_unit(input wire I_clk, 
+    input wire I_reset,
+    /* verilator lint_off UNUSED */
+    input reg[15:0] I_instruction,
+    input wire I_mem_ready,
+    input wire I_data_ready,
+    output reg[5:0] O_state,
+    output reg O_execute);
 
 reg mem_wait = 0;
 reg[3:0] instr;

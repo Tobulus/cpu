@@ -1,14 +1,13 @@
 module uart_rx
 #(parameter CLKS_PER_BIT = 120)
-(input I_clk, 
-    input I_reset,
-    input I_data_bit,
-    output O_ready,
-    output O_data_ready,
-    output O_data);
+(input wire I_clk, 
+    input wire I_reset,
+    input wire I_data_bit,
+    output reg O_ready,
+    output reg O_data_ready,
+    output reg[7:0] O_data);
 
-reg O_data_ready, O_ready;
-reg[7:0] O_data, buffer, clk_count;
+reg[7:0] buffer, clk_count;
 reg[3:0] state;
 
 always @(posedge I_clk)

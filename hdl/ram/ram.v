@@ -1,17 +1,13 @@
-module ram(input I_clk,
-    input I_reset, 
-    input I_enable,
-    input I_size,
-    input I_write,
+module ram(input wire I_clk,
+    input wire I_reset, 
+    input wire I_enable,
+    input wire [1:0] I_size,
+    input wire I_write,
     /* verilator lint_off UNUSED */
-    input I_addr,
-        input I_data_in,
-        output O_data_out
+    input wire[15:0] I_addr,
+        input wire[15:0] I_data_in,
+        output reg[15:0] O_data_out
     );
-
-    wire[15:0] I_addr, I_data_in;
-    reg[15:0] O_data_out;
-    wire[1:0] I_size;
 
     reg[7:0] mem [2048:0];
 

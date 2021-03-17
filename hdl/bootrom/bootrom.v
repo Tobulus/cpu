@@ -1,12 +1,10 @@
-module bootrom(input I_clk,
-    input I_reset,
-    input I_enable,
-    input I_addr,
-    output O_data_out
+module bootrom(input wire I_clk,
+    input wire I_reset,
+    input wire I_enable,
+    input wire[7:0] I_addr,
+    output reg[15:0] O_data_out
 );
 
-wire[7:0] I_addr;
-reg[15:0] O_data_out;
 reg[7:0] mem [255:0];
 
 initial begin

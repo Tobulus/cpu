@@ -1,14 +1,13 @@
 module uart_tx
 #(parameter CLKS_PER_BIT = 120)
-(input I_clk,
-    input I_reset,
-    input I_data,
-    input I_exec,
-    output O_ready,
-    output O_data);
+(input wire I_clk,
+    input wire I_reset,
+    input reg[7:0] I_data,
+    input wire I_exec,
+    output wire O_ready,
+    output reg O_data);
 
-reg O_data;
-reg[7:0] I_data, buffer, clk_count;
+reg[7:0] buffer, clk_count;
 reg[3:0] state;
 
 always @(posedge I_clk)

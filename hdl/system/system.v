@@ -1,17 +1,17 @@
-module system(input I_clk, 
-    input I_reset,
-    input UART_rx_in_data, 
-    output UART_rx_ready,
-    output UART_tx_out_data);
+module system(input wire I_clk, 
+    input wire I_reset,
+    input wire UART_rx_in_data, 
+    output wire UART_rx_ready,
+    output wire UART_tx_out_data);
 
-wire ram_enable, bootrom_enable, mem_exec, mem_write, UART_tx_ready, UART_rx_data_ready, UART_tx_exec;
+wire ram_enable, bootrom_enable, mem_exec, mem_write;
+wire UART_tx_ready, UART_rx_data_ready, UART_tx_exec;
 wire[15:0] ram_data_in, bootrom_out, ram_data_out, mem_addr, mem_data_in, mem_data_out;
 wire[7:0] UART_rx_out_data, UART_tx_in_data;
 reg[7:0] rx_data;
 wire[1:0] mem_size;
-reg mem_ready = 1, mem_data_ready = 0, rx_data_ready;
+reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, booting = 1;
 reg[1:0] state = 0;
-reg booting = 1;
 
 core core(.I_clk(I_clk),
     .I_reset(I_reset),

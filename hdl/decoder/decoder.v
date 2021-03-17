@@ -1,22 +1,16 @@
 `include "../alu/ops.vh"
 
-module decoder(input I_clk,
-    input I_reset, 
-    input I_enable,
-    input I_instruction,
-    output O_opcode,
-    output O_rD_select,
-    output O_rD_write_pos,
-    output O_rA_select,
-    output O_rB_select,
-    output O_immediate,
-output O_mode);
-
-wire[1:0] O_rD_write_pos;
-reg[15:0] I_instruction;
-reg[3:0] O_opcode;
-reg[2:0] O_rD_select, O_rA_select, O_rB_select;
-reg[7:0] O_immediate;
+module decoder(input wire I_clk,
+    input wire I_reset, 
+    input wire I_enable,
+    input reg[15:0] I_instruction,
+    output reg [3:0] O_opcode,
+    output reg[2:0] O_rD_select,
+    output wire[1:0] O_rD_write_pos,
+    output reg[2:0] O_rA_select,
+    output reg[2:0] O_rB_select,
+    output reg[7:0] O_immediate,
+output wire O_mode);
 
 always @(posedge I_clk)
 begin: decoder

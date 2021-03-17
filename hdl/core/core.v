@@ -1,18 +1,18 @@
-module core(input I_clk, 
-    input I_reset,
-    input MEM_ready,
-    input MEM_data_in, 
-    input MEM_data_ready,
-    output MEM_exec, 
-    output MEM_write,
-    output MEM_size, 
-    output MEM_addr, 
-    output MEM_data_out);
+module core(input wire I_clk, 
+    input wire I_reset,
+    input wire MEM_ready,
+    input reg[15:0] MEM_data_in, 
+    input wire MEM_data_ready,
+    output wire MEM_exec, 
+    output wire MEM_write,
+    output reg[1:0] MEM_size, 
+    output reg[15:0] MEM_addr, 
+    output reg[15:0] MEM_data_out);
 
-wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
+wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable;
+wire write_rD, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode;
 wire[1:0] rD_write_pos;
-reg[15:0] MEM_data_in, MEM_data_out, MEM_addr;
-reg[1:0] memory_mode, memory_size, alu_memory_size, MEM_size;
+reg[1:0] memory_mode, memory_size, alu_memory_size;
 reg[2:0] rD_select, rA_select, rB_select;
 reg[3:0] opcode;
 reg[7:0] immediate;

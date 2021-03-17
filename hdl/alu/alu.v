@@ -2,27 +2,21 @@
 `include "mem_acc.vh"
 `include "cmp_res.vh"
 
-module alu(input I_clk,
-    input I_reset,
-    input I_enable,
-    input I_opcode,
-    input I_opcode_mode,
-    input I_immediate,
-    input I_pc,
-    input I_rA,
-    input I_rB,
-    input I_compare_code,
-    output O_out,
-    output O_write_rD,
-    output O_write_pc,
-    output O_memory_size,
-    output O_memory_mode);
-
-reg[3:0] I_opcode;
-reg[2:0] I_compare_code;
-reg[1:0] O_memory_mode, O_memory_size;
-reg[15:0] I_pc, I_rA, I_rB, O_out;
-reg[7:0] I_immediate;
+module alu(input wire I_clk,
+    input wire I_reset,
+    input wire I_enable,
+    input reg[3:0] I_opcode,
+    input wire I_opcode_mode,
+    input reg[7:0] I_immediate,
+    input reg[15:0] I_pc,
+    input reg[15:0] I_rA,
+    input reg[15:0] I_rB,
+    input reg[2:0]I_compare_code,
+    output reg[15:0] O_out,
+    output wire O_write_rD,
+    output wire O_write_pc,
+    output reg[1:0] O_memory_size,
+    output reg[1:0] O_memory_mode);
 
 localparam OPCODE_MODE_SIGNED = 1'b0;
 localparam OPCODE_MODE_UNSIGNED = 1'b1;

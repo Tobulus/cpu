@@ -1,18 +1,15 @@
-module register(input I_clk,
-    input I_reset, 
-    input I_enable,
-    input I_rD_select,
-    input I_rA_select,
-    input I_rB_select,
-    input  I_rD_in,
-    input I_rD_write,
-    input I_rD_write_pos,
-    output  O_rA_out,
-    output O_rB_out);
+module register(input wire I_clk,
+    input wire I_reset, 
+    input wire I_enable,
+    input reg[2:0] I_rD_select,
+    input reg[2:0] I_rA_select,
+    input reg[2:0] I_rB_select,
+    input reg[15:0] I_rD_in,
+    input wire I_rD_write,
+    input wire[1:0] I_rD_write_pos,
+    output reg[15:0] O_rA_out,
+    output reg[15:0] O_rB_out);
 
-reg[2:0] I_rA_select, I_rB_select, I_rD_select;
-reg[15:0] I_rD_in, O_rA_out, O_rB_out;
-wire[1:0] I_rD_write_pos;
 reg[15:0] registers[0:7];
 integer i;
 
