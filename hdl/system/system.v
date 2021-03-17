@@ -65,6 +65,9 @@ always @(posedge I_clk)
 begin: system
     if (I_reset == 1) begin
         booting <= 1;
+        mem_ready <= 1; 
+        mem_data_ready <= 0;
+        state <= 0;
     end
     else begin
         if (state == 0) begin

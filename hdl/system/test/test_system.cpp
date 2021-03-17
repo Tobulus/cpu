@@ -9,6 +9,13 @@
 class System_Test_Bench: public TESTBENCH<Vsystem> {
 
     public:
+        void reset_system() {
+            m_core->I_reset = 1;
+            this->tick();
+            m_core->I_reset = 0;
+            this->tick();
+        }
+
         void tx_tick(Vuart_tx* tx) {
             tx->I_clk = 0;
             tx->eval();
@@ -159,8 +166,8 @@ int main(int argc, char** argv, char** env) {
     System_Test_Bench *bench = new System_Test_Bench;
     bench->opentrace("trace.vcd");
 
-    //bench->test_add();
     bench->test_mult();
+    bench->test_add();
 
     printf("Success!\n");
 

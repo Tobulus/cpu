@@ -96,32 +96,37 @@ pc pc(.I_clk(I_clk),
 
 always @(*)
 begin
-    instruction = MEM_data_in;//TODO: mem_data_out;
-    decoder_enable = state[1];
-    register_enable = state[2] || state[5];
-    alu_enable = state[3];
-    mem_enable = state[4];
-    pc_enable = state[5];
-    pc_in = alu_out;
-    mem_addr = mem_enable ? alu_out : pc_out;
-    mem_data_in = rB_out;
-    write_rD = state[5] && alu_write_rD;
-    memory_size = state[0] ? 2 : alu_memory_size;
-
-    if (memory_mode == MEM_READ) begin
-        register_in = mem_data_out;
+    if (I_reset == 1) begin
+        
     end
     else begin
-        register_in = alu_out;
-    end
+        instruction = MEM_data_in;//TODO: mem_data_out;
+        decoder_enable = state[1];
+        register_enable = state[2] || state[5];
+        alu_enable = state[3];
+        mem_enable = state[4];
+        pc_enable = state[5];
+        pc_in = alu_out;
+        mem_addr = mem_enable ? alu_out : pc_out;
+        mem_data_in = rB_out;
+        write_rD = state[5] && alu_write_rD;
+        memory_size = state[0] ? 2 : alu_memory_size;
 
-    if (mem_enable && memory_mode == MEM_WRITE)
-    begin
-        mem_write = 1;
-    end
-    else 
-    begin
-        mem_write = 0;
+        if (memory_mode == MEM_READ) begin
+            register_in = mem_data_out;
+        end
+        else begin
+            register_in = alu_out;
+        end
+
+        if (mem_enable && memory_mode == MEM_WRITE)
+        begin
+            mem_write = 1;
+        end
+        else 
+        begin
+            mem_write = 0;
+        end
     end
 end
 

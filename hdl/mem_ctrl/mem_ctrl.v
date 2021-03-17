@@ -39,7 +39,10 @@ end
 
 always @(posedge I_clk)
 begin: MEM_CTRL
-    if (I_reset == 0) begin
+    if (I_reset == 1) begin
+        state <= 0;
+    end
+    else begin
         if (state == 0 && I_exec == 1 && MEM_ready == 1) 
         begin
             O_data_ready <= 0;

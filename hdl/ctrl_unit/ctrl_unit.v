@@ -16,6 +16,7 @@ always @(posedge I_clk)
 begin: CTRL_UNIT
     if (I_reset == 1) 
     begin
+        mem_wait <= 0;
         O_state <= 1;
     end
     else if (O_state == 6'b000001)
