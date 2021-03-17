@@ -1,6 +1,6 @@
 add.u r3, r2, r1
-add.s r3, r2, r1
-add.u r3, r2, 1
+add.s r3, r2, r1 #test comment
+add.u r3, r2, 1 #   testcomment
 add.s r3, r2, -1
 sub.u r3, r2, r1
 sub.s r3, r2, r1
@@ -13,6 +13,7 @@ and r2, r1, 1
 xor r3, r2, r1
 xor r2, r1, 1
 not r2, r1
+#test
 read.w r2, r1, 0
 read.w r2, r1, 1
 read.b r2, r1, 0

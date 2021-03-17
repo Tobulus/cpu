@@ -62,24 +62,29 @@ with open(options.input_file) as f:
 
     # parse all labels first to get their memory offsets
     for line in lines:
-        if match := re.fullmatch(LABEL, line):
+        if line.strip().startswith("#"):
+            continue
+        elif match := re.fullmatch(LABEL, line):
             if match.group(1) in labels:
                 raise Exception('Label "{}" already exists'.format(match.group(1)))
             labels[match.group(1)] = pos
         else:
             pos += 2
-
+    
     # parse instructions
     pos = 0
     for line in lines:
         instruction = 0
 
-        if re.fullmatch(LABEL, line):
-            # do not increase the offset counter
+        if line.strip().startswith("#"):
+            continue
+        elif re.fullmatch(LABEL, line):
+            # do not increase the offset counter for labels
            continue
         else:
-            params = [x.strip() for x in line.split(" ", 1)[1].split(",")]
-            output += [op_handlers[line.split(" ", 1)[0]].invoke(params, labels, pos)]
+            op, param_string = line.strip().split("#", 1)[0].split(" ", 1) 
+            params = [param.strip() for param in param_string.split(",")]
+            output += [op_handlers[op].invoke(params, labels, pos)]
         pos += 2
 
 if options.ascii:

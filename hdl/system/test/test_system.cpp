@@ -9,6 +9,15 @@
 class System_Test_Bench: public TESTBENCH<Vsystem> {
 
     public:
+        void reset_uarts(Vuart_tx* tx, Vuart_rx* rx) {
+            tx->I_reset = 1;
+            rx->I_reset = 1;
+            rx_tick(rx);
+            tx_tick(tx);
+            tx->I_reset = 0;
+            rx->I_reset = 0;
+        }
+
         void reset_system() {
             m_core->I_reset = 1;
             this->tick();
@@ -60,13 +69,8 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             Vuart_tx* tx = new Vuart_tx;
             Vuart_rx* rx = new Vuart_rx;
 
-            /* reset UARTs */
-            tx->I_reset = 1;
-            rx->I_reset = 1;
-            rx_tick(rx);
-            tx_tick(tx);
-            tx->I_reset = 0;
-            rx->I_reset = 0;
+            reset_uarts(tx, rx);
+            reset_system();
 
             /* assemble the multiplication test program */
             system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
@@ -74,10 +78,6 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             std::ifstream file;
             std::array<char, 1> bytes;
             file.open("test/add.bin", std::ifstream::in | std::ios::binary);
-            m_core->I_reset = 1;
-            this->tick();
-            m_core->I_reset = 0;
-            this->tick();
 
             /* read the binary test program and send it via the UART to the RAM */
             while (file.read(bytes.data(), bytes.size())) {
@@ -111,14 +111,9 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
         void test_mult() {
             Vuart_tx* tx = new Vuart_tx;
             Vuart_rx* rx = new Vuart_rx;
-
-            /* reset UARTs */
-            tx->I_reset = 1;
-            rx->I_reset = 1;
-            rx_tick(rx);
-            tx_tick(tx);
-            tx->I_reset = 0;
-            rx->I_reset = 0;
+            
+            reset_uarts(tx, rx);
+            reset_system();
 
             /* assemble the multiplication test program */
             system("python3.8 ../../assembler/assembler.py --input test/mult.asm --output test/mult.bin");
@@ -126,10 +121,6 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             std::ifstream file;
             std::array<char, 1> bytes;
             file.open("test/mult.bin", std::ifstream::in | std::ios::binary);
-            m_core->I_reset = 1;
-            this->tick();
-            m_core->I_reset = 0;
-            this->tick();
 
             /* read the binary test program and send it via the UART to the RAM */
             while (file.read(bytes.data(), bytes.size())) {

@@ -1,10 +1,13 @@
-MAIN:
+# stack pointer
 load.l r7, 50
 load.h r7, 0
+# operand a
 load.l r1, 4
 load.h r1, 0
+# operand b
 load.l r2, 3
 load.h r2, 0
+# write operands to the stack
 sub.u r7, r7, 4
 write.b r7, r1, 2
 write.b r7, r2, 3
@@ -13,8 +16,10 @@ add.u r3, r3, 8
 write.w r7, r3
 br $MULT
 add.u r7, r7, 4
+# uart-tx adress
 load.l r1, 0
 load.h r1, 4
+# send the result
 write.b r1, r0
 MULT:
 read.b r1, r7, 2
