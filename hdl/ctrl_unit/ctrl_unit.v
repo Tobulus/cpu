@@ -6,10 +6,14 @@ module ctrl_unit(input wire I_clk,
     input reg[15:0] I_instruction,
     input wire I_mem_ready,
     input wire I_data_ready,
-    output reg[5:0] O_state,
-    output reg O_execute);
+    input wire I_irq_enabled,
+    input wire I_irq_active,
+    output reg O_irq_ack,
+    output reg[8:0] O_state,
+    output reg O_execute,
+    output reg O_push_pc);
 
-reg mem_wait = 0;
+reg mem_wait = 0, wait_irq_number = 0, irq_save_pc = 0;
 reg[3:0] instr;
 
 always @(posedge I_clk)
@@ -19,7 +23,7 @@ begin: CTRL_UNIT
         mem_wait <= 0;
         O_state <= 1;
     end
-    else if (O_state == 6'b000001)
+    else if (O_state == 9'b000000001)
     begin
         // fetch
         if (I_mem_ready == 1 && mem_wait == 0)
@@ -32,40 +36,40 @@ begin: CTRL_UNIT
             O_execute <= 0;
             if (I_data_ready == 1)
             begin
-                instr <= I_instruction[15:12];
                 mem_wait <= 0;
-                O_state <= 6'b000010;
+                O_state <= 9'b000000010;
             end
         end
     end
-    else if (O_state == 6'b000010)
+    else if (O_state == 9'b000000010)
     begin
         // decode
-        O_state <= 6'b000100;
+        O_state <= 9'b000000100;
+        instr <= I_instruction[15:12];
     end
-    else if (O_state == 6'b000100)
+    else if (O_state == 9'b000000100)
     begin
         // register read
-        O_state <= 6'b001000;
+        O_state <= 9'b000001000;
     end
-    else if (O_state == 6'b001000)
+    else if (O_state == 9'b000001000)
     begin
         // execute
-        if (instr == WRITE || instr == READ)
+        if (instr == WRITE || instr == READ || (instr == SPECIAL && I_instruction[2:0] == 3'b100) || instr == STACK)
         begin
             if (I_mem_ready == 1 && mem_wait == 0)
             begin
                 O_execute <= 1;
                 mem_wait <= 1;
             end
-            O_state <= 6'b010000; 
+            O_state <= 9'b000010000; 
         end
         else 
         begin
-            O_state <= 6'b100000;
+            O_state <= 9'b000100000;
         end
     end
-    else if (O_state == 6'b010000)
+    else if (O_state == 9'b000010000)
     begin
         // store
         if (I_mem_ready == 1 && mem_wait == 0)
@@ -76,17 +80,53 @@ begin: CTRL_UNIT
         else if (mem_wait == 1)
         begin
             O_execute <= 0;
-            if ((instr == WRITE && I_mem_ready == 1) || (instr == READ && I_data_ready == 1))
+            if (((instr == WRITE || (instr == STACK && I_instruction[8] == 0)) && I_mem_ready == 1) 
+                || ((instr == READ || (instr == SPECIAL && I_instruction[2:0] == 3'b100) || (instr == STACK && I_instruction[8])) && I_data_ready == 1))
             begin
                 mem_wait <= 0;
-                O_state <= 6'b100000;
+                O_state <= 9'b000100000;
             end
         end
     end
-    else if (O_state == 6'b100000)
+    else if (O_state == 9'b000100000)
     begin
-        // register write
-        O_state <= 6'b000001;
+        // register write state
+        if (I_irq_enabled && I_irq_active && irq_save_pc == 0) begin
+            // irq requested -> fetch irq number and save pc
+            O_irq_ack <= 1;
+            O_state <= 9'b001000000;
+        end
+        else if (irq_save_pc == 1) begin
+            // pc has been saved, now enter ISR
+            irq_save_pc <= 0;
+            O_push_pc <= 0;
+            O_state <= 9'b100000000;
+        end
+        else begin
+            O_state <= 9'b000000001;
+        end
+    end
+    else if (O_state == 9'b001000000) begin
+        // fetch irq number
+        O_irq_ack <= 0;
+        if (wait_irq_number == 1) begin
+            O_state <= 9'b010000000;
+            wait_irq_number <= 0;
+        end
+        else begin
+            wait_irq_number <= 1;
+        end
+    end
+    else if (O_state == 9'b010000000) begin
+        // save pc to stack
+        irq_save_pc <= 1;
+        O_push_pc <= 1;
+        O_irq_ack <= 0;
+        O_state <= 9'b000000010;
+    end
+    else if (O_state == 9'b100000000) begin
+        // enter ISR
+        O_state <= 9'b000000001;
     end
 end
 

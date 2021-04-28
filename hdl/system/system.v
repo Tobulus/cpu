@@ -5,16 +5,18 @@ module system(input wire I_clk,
     output wire UART_tx_out_data);
 
 wire ram_enable, bootrom_enable, mem_exec, mem_write;
-wire UART_tx_ready, UART_rx_data_ready, UART_tx_exec;
+wire UART_tx_ready, UART_rx_data_ready, UART_tx_exec, irq_ack;
 wire[15:0] ram_data_in, bootrom_out, ram_data_out, mem_addr, mem_data_in, mem_data_out;
 wire[7:0] UART_rx_out_data, UART_tx_in_data;
 reg[7:0] rx_data;
 wire[1:0] mem_size;
-reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, booting = 1;
+reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, booting = 1, irq_enabled = 0;
 reg[1:0] state = 0;
 
 core core(.I_clk(I_clk),
     .I_reset(I_reset),
+    .I_irq_active(irq_enabled),
+    .O_irq_ack(irq_ack),
     .MEM_ready(mem_ready),
     .MEM_exec(mem_exec),
     .MEM_write(mem_write),
@@ -54,10 +56,22 @@ uart_tx uart_tx(.I_clk(I_clk),
     .O_data(UART_tx_out_data));
 
 always@(posedge I_clk)
-begin: uart_observe
+begin: device_observer
+    // ordering of the signals defines the irq prio
     if (UART_rx_data_ready) begin
         rx_data_ready <= 1;
+        //TODO: remove, data should be fetched from irq handler
         rx_data <= UART_rx_out_data;
+        irq_enabled <= 1;
+    end
+
+    if (irq_ack == 1) begin
+        if (rx_data_ready == 1) begin
+            irq_enabled <= 0;
+            mem_data_in[15:8] <= 0;
+            mem_data_in[7:0] <= 1; // irq-id
+            rx_data_ready <= 0;
+        end
     end
 end
 
@@ -85,6 +99,7 @@ begin: system
                         mem_data_in[15:8] <= 0;
                         mem_data_in[7:0] <= rx_data;
                         state <= 1;
+                        irq_enabled <= 0;
                     end
                 end
                 // UART rx data ready status

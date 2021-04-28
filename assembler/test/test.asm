@@ -33,3 +33,9 @@ br $TEST
 br.eq r2, r1
 br.gt r1, $TEST
 spc r2
+ei
+di
+reti
+push r1
+push.pc
+pop r1

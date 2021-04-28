@@ -150,6 +150,52 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             /* mult(3,4) == 12 */
             ASSERT_EQ(rx->O_data, 12);
         }
+
+        void test_irq() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
+
+            reset_uarts(tx, rx);
+            reset_system();
+
+            /* assemble the irq test program */
+            system("python3.8 ../../assembler/assembler.py --input test/irq.asm --output test/irq.bin");
+
+            std::ifstream file;
+            std::array<char, 1> bytes;
+            file.open("test/irq.bin", std::ifstream::in | std::ios::binary);
+
+            /* read the binary test program and send it via the UART to the RAM */
+            while (file.read(bytes.data(), bytes.size())) {
+                transfer_byte(tx, bytes.at(0));
+            }
+
+            file.close();
+
+            /* program is transfered - now tell the bootloader to jump to the
+             * beginning of the transfered executable by sending two times 0xFF */
+
+            transfer_byte(tx, 0xFF);
+            transfer_byte(tx, 0xFF);
+
+            printf("wait for completion of test program...\n");
+            fflush(stdout);
+
+            /* send some value which is received via an interrupt */
+            uint8_t test_value = 0x9;
+            transfer_byte(tx, test_value);
+
+            /* wait for the completion and check the result which was received via UART */
+            while (!rx->O_data_ready) {
+                rx_tick(rx);    
+                this->tick();
+                rx->I_data_bit = m_core->UART_tx_out_data;
+            }
+            
+            printf("Done.\n");
+
+            ASSERT_EQ(rx->O_data, test_value);
+        }
 };
 
 int main(int argc, char** argv, char** env) {
@@ -159,6 +205,7 @@ int main(int argc, char** argv, char** env) {
 
     bench->test_mult();
     bench->test_add();
+    bench->test_irq();
 
     printf("Success!\n");
 

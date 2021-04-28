@@ -12,7 +12,8 @@ from ops.op_shift import op_shift
 from ops.op_mem_read import op_mem_read
 from ops.op_mem_write import op_mem_write
 from ops.op_branch import op_branch
-from ops.op_spc import op_spc
+from ops.op_spec import op_spec
+from ops.op_stack import op_stack
 
 LABEL   = "(\w+):"
 
@@ -50,7 +51,13 @@ handlers += [op_branch(False, op_branch.MODE_LT)]
 handlers += [op_branch(False, op_branch.MODE_GT)]
 handlers += [op_branch(False, op_branch.MODE_AZ)]
 handlers += [op_branch(False, op_branch.MODE_BZ)]
-handlers += [op_spc()]
+handlers += [op_spec(op_spec.MODE_RETI)]
+handlers += [op_spec(op_spec.MODE_EI)]
+handlers += [op_spec(op_spec.MODE_DI)]
+handlers += [op_spec(op_spec.MODE_SPC)]
+handlers += [op_stack(op_stack.MODE_PUSH_STACK)]
+handlers += [op_stack(op_stack.MODE_PUSH_PC_TO_STACK)]
+handlers += [op_stack(op_stack.MODE_POP_STACK)]
 
 for handler in handlers:
     op_handlers[handler.get_op()] = handler
@@ -82,7 +89,10 @@ with open(options.input_file) as f:
             # do not increase the offset counter for labels
            continue
         else:
-            op, param_string = line.strip().split("#", 1)[0].split(" ", 1) 
+            instr = line.strip().split("#", 1)[0]
+            instr_split = instr.split(" ", 1)
+            op = instr_split[0]
+            param_string = instr_split[1] if len(instr_split) > 1 else ""
             params = [param.strip() for param in param_string.split(",")]
             output += [op_handlers[op].invoke(params, labels, pos)]
         pos += 2

@@ -11,10 +11,12 @@ module alu(input wire I_clk,
     input reg[15:0] I_pc,
     input reg[15:0] I_rA,
     input reg[15:0] I_rB,
-    input reg[2:0]I_compare_code,
+    input reg[2:0] I_compare_code,
+    input wire I_irq_active,
     output reg[15:0] O_out,
     output wire O_write_rD,
     output wire O_write_pc,
+    output reg O_irq_enable,
     output reg[1:0] O_memory_size,
     output reg[1:0] O_memory_mode);
 
@@ -26,10 +28,23 @@ localparam OPCODE_MODE_LO = 1'b0;
 
 localparam OPCODE_MODE_IMMEDIATE = 1'b1;
 
+reg irq_recover = 0;
+
+always @(posedge I_clk)
+begin: IRQ_ACTIVE
+    // ctrl-unit entered an interrupt
+    // -> disable interrupts
+    if (I_irq_active) begin
+        O_irq_enable <= 0;
+    end
+end
+
 always @(posedge I_clk)
 begin: ALU
-    if (I_enable == 1 && I_reset == 0)
-    begin
+    if (I_reset) begin
+        O_irq_enable <= 0;
+    end
+    else if (I_enable == 1) begin
         if (I_opcode == ADD)
         begin
             if (I_opcode_mode == OPCODE_MODE_SIGNED)
@@ -241,13 +256,64 @@ begin: ALU
                 O_write_pc <= I_rA[CMP_RB_ZERO_BIT] == 1 ? 1 : 0;
             end
         end
-        else if(I_opcode == SPC)
+        else if(I_opcode == SPECIAL)
         begin
-            O_out <= I_pc;
-            O_memory_mode <= MEM_NOP;
-            O_write_rD <= 1;
-            O_write_pc <= 0;
-            O_memory_size <= 1;
+            // Save pc
+            if (I_immediate[2:0] == 3'b000) begin 
+                O_out <= I_pc;
+                O_memory_mode <= MEM_NOP;
+                O_write_rD <= 1;
+                O_write_pc <= 0;
+                O_memory_size <= 1;
+            end
+            // Enable irq
+            else if (I_immediate[2:0] == 3'b001) begin 
+                O_out <= I_pc;
+                O_memory_mode <= MEM_NOP;
+                O_write_rD <= 0;
+                O_write_pc <= 0;
+                O_memory_size <= 1;
+                O_irq_enable <= 1;
+                irq_recover <= 1;
+            end
+            // Disable irq
+            else if (I_immediate[2:0] == 3'b010) begin 
+                O_out <= I_pc;
+                O_memory_mode <= MEM_NOP;
+                O_write_rD <= 0;
+                O_write_pc <= 0;
+                O_memory_size <= 1;
+                O_irq_enable <= 0;
+                irq_recover <= 0;
+            end
+            // Return from irq
+            else if (I_immediate[2:0] == 3'b100) begin 
+                O_out <= $signed(I_rA) + 2;
+                O_memory_mode <= MEM_READ;
+                O_write_rD <= 1;
+                O_write_pc <= 1;
+                O_memory_size <= 2;
+                O_irq_enable <= irq_recover;
+            end
+        end
+        else if(I_opcode == STACK)
+        begin
+            if (I_opcode_mode == 0) begin
+                // PUSH
+                O_out <= $signed(I_rA) - 2;
+                O_memory_mode <= MEM_WRITE;
+                O_write_rD <= 1;
+                O_write_pc <= 0;
+                O_memory_size <= 2;
+            end 
+            else if (I_opcode_mode == 1) begin
+                // POP
+                O_out <= $signed(I_rA) + 2;
+                O_memory_mode <= MEM_READ;
+                O_write_rD <= 1;
+                O_write_pc <= 0;
+                O_memory_size <= 2;
+            end
         end
     end
 end

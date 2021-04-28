@@ -27,4 +27,10 @@
  1  0  1  1|       |1|rA             | Branch
  1  1  0  0|c  c  c|0|rA   |rB   |   | Branch compare
  1  1  0  0|c  c  c|1|rA   |Immediate| Branch compare immediate offset
- 1  1  0  1|rD     |0|     |         | Save stack pointer
+ 1  1  0  1|rD     |0|     |    0 0 0| Save program counter
+ 1  1  0  1|       |0|     |    0 0 1| Enable irq
+ 1  1  0  1|       |0|     |    0 1 0| Disable irq
+ 1  1  0  1|       |0|rA   |    1 0 0| Return from irq (rA is stack register)
+ 1  1  1  0|       |0|rA   |rB   |  0| Push to stack
+ 1  1  1  0|       |0|rA   |     |  1| Push program counter to stack
+ 1  1  1  0|rD     |1|rA   |         | Pop from stack

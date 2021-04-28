@@ -10,7 +10,7 @@ module decoder(input wire I_clk,
     output reg[2:0] O_rA_select,
     output reg[2:0] O_rB_select,
     output reg[7:0] O_immediate,
-output wire O_mode);
+    output wire O_mode);
 
 always @(posedge I_clk)
 begin: decoder
@@ -25,22 +25,22 @@ begin: decoder
         if (I_instruction[15:12] == WRITE)
         begin
             O_immediate <= {{3{I_instruction[11]}}, I_instruction[11:9], I_instruction[1:0]}; 
-		    O_rD_write_pos <= 0;
+            O_rD_write_pos <= 0;
         end
         else if(I_instruction[15:12] == LOAD || I_instruction[15:12] == JMP)
         begin
             O_immediate <= I_instruction[7:0];
-	    if (I_instruction[8] == 0) begin
-		    O_rD_write_pos <= 1;
-	    end
-	    else begin
-		    O_rD_write_pos <= 2;
-	    end
+            if (I_instruction[8] == 0) begin
+                O_rD_write_pos <= 1;
+            end
+            else begin
+                O_rD_write_pos <= 2;
+            end
         end
-	else begin
-		O_immediate <= {{3{I_instruction[4]}}, I_instruction[4:0]};
-		    O_rD_write_pos <= 0;
-	end
+        else begin
+            O_immediate <= {{3{I_instruction[4]}}, I_instruction[4:0]};
+            O_rD_write_pos <= 0;
+        end
     end
 end
 endmodule
