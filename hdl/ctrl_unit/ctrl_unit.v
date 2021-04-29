@@ -14,7 +14,7 @@ module ctrl_unit(input wire I_clk,
     output reg O_push_pc);
 
 reg mem_wait = 0, wait_irq_number = 0, irq_save_pc = 0;
-reg[3:0] instr;
+reg[15:0] instr;
 
 always @(posedge I_clk)
 begin: CTRL_UNIT
@@ -45,7 +45,7 @@ begin: CTRL_UNIT
     begin
         // decode
         O_state <= 9'b000000100;
-        instr <= I_instruction[15:12];
+        instr <= I_instruction;
     end
     else if (O_state == 9'b000000100)
     begin
@@ -55,7 +55,7 @@ begin: CTRL_UNIT
     else if (O_state == 9'b000001000)
     begin
         // execute
-        if (instr == WRITE || instr == READ || (instr == SPECIAL && I_instruction[2:0] == 3'b100) || instr == STACK)
+        if (instr[15:12] == WRITE || instr[15:12] == READ || (instr[15:12] == SPECIAL && instr[2:0] == 3'b100) || instr[15:12] == STACK)
         begin
             if (I_mem_ready == 1 && mem_wait == 0)
             begin
@@ -80,8 +80,8 @@ begin: CTRL_UNIT
         else if (mem_wait == 1)
         begin
             O_execute <= 0;
-            if (((instr == WRITE || (instr == STACK && I_instruction[8] == 0)) && I_mem_ready == 1) 
-                || ((instr == READ || (instr == SPECIAL && I_instruction[2:0] == 3'b100) || (instr == STACK && I_instruction[8])) && I_data_ready == 1))
+            if (((instr[15:12] == WRITE || (instr[15:12] == STACK && instr[8] == 0)) && I_mem_ready == 1) 
+                || ((instr[15:12] == READ || (instr[15:12] == SPECIAL && instr[2:0] == 3'b100) || (instr[15:12] == STACK && instr[8])) && I_data_ready == 1))
             begin
                 mem_wait <= 0;
                 O_state <= 9'b000100000;

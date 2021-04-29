@@ -2,15 +2,20 @@ IRQ_VECTORS:
 br $MAIN      # RST
 br $UART_RECV # UART-IRQ
 UART_RECV:
-load.l r3, 0
-load.h r3, 4
-read.b r4, r3
-write.b r3, r4
+read.b r1, r3
 reti
 MAIN:
+load.l r1, 0
+load.h r1, 0
+load.l r2, 0
+load.h r2, 0
+load.l r3, 0
+load.h r3, 4 # UART
 load.l r7, 0 
-load.h r7, 4 # SP
+load.h r7, 8 # SP
 ei
 LOOP:
-add.u r1, r1, 0 # NOP
+cmp r2, r1, r1
+br.az r2, $LOOP
+write.b r3, r1
 br $LOOP

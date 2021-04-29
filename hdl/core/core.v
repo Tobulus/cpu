@@ -120,25 +120,35 @@ begin
        // nothing to do currently 
     end
     else begin
-        instruction = push_pc ? {STACK, 4'b1110, {3{1'b1}}, 5'b00001} : MEM_data_in;//TODO: mem_data_out;
+        // only update the instruction on decode stage
+        if (state[1]) begin
+            instruction = push_pc ? {STACK, 4'b1110, {3{1'b1}}, 5'b00001} : MEM_data_in;//TODO: mem_data_out;
+        end
         decoder_enable = state[1];
         register_enable = state[2] || state[5];
         alu_enable = state[3];
         mem_enable = state[4] || state[7];
         // inc pc on reg write-back and write pc on ISR enter
         pc_enable = state[5] || state[8];
-        mem_addr = mem_enable ? alu_out : pc_out;
         mem_data_in = (opcode == STACK && instruction[0] == 1) ? pc_out : rB_out;
         write_rD = state[5] && alu_write_rD;
         memory_size = state[0] ? 2 : alu_memory_size;
         O_irq_ack = irq_ack;
         
+        // POP or RETI
+        if ((opcode == SPECIAL && instruction[2:0] == 3'b100) || (opcode == STACK && instruction[8] == 1)) begin
+            mem_addr = rA_out;
+        end
+        else begin
+            mem_addr = mem_enable ? alu_out : pc_out;
+        end
+
         if (state[8]) begin
             // branch to ISR
             pc_in = 16'h64 + irq_number * 2;
             pc_write = 1;
         end
-        else if(instruction[15:12] == SPECIAL && instruction[2:0] == 3'b100) begin
+        else if (instruction[15:12] == SPECIAL && instruction[2:0] == 3'b100) begin
             // return from ISR
             pc_in = mem_data_out;
             pc_write = 1;
