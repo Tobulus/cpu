@@ -136,7 +136,7 @@ begin
         O_irq_ack = irq_ack;
         
         // POP or RETI
-        if ((opcode == SPECIAL && instruction[2:0] == 3'b100) || (opcode == STACK && instruction[8] == 1)) begin
+        if (state[0] != 1 && ((opcode == SPECIAL && instruction[2:0] == 3'b100) || (opcode == STACK && instruction[8] == 1))) begin
             mem_addr = rA_out;
         end
         else begin

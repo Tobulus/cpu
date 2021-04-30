@@ -196,6 +196,48 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
             ASSERT_EQ(rx->O_data, test_value);
         }
+        
+        void test_stack() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
+
+            reset_uarts(tx, rx);
+            reset_system();
+
+            /* assemble the stack test program */
+            system("python3.8 ../../assembler/assembler.py --input test/stack.asm --output test/stack.bin");
+
+            std::ifstream file;
+            std::array<char, 1> bytes;
+            file.open("test/stack.bin", std::ifstream::in | std::ios::binary);
+
+            /* read the binary test program and send it via the UART to the RAM */
+            while (file.read(bytes.data(), bytes.size())) {
+                transfer_byte(tx, bytes.at(0));
+            }
+
+            file.close();
+
+            /* program is transfered - now tell the bootloader to jump to the
+             * beginning of the transfered executable by sending two times 0xFF */
+
+            transfer_byte(tx, 0xFF);
+            transfer_byte(tx, 0xFF);
+
+            printf("wait for completion of test program...\n");
+            fflush(stdout);
+
+            /* wait for the completion and check the result which was received via UART */
+            while (!rx->O_data_ready) {
+                rx_tick(rx);    
+                this->tick();
+                rx->I_data_bit = m_core->UART_tx_out_data;
+            }
+            
+            printf("Done.\n");
+
+            ASSERT_EQ(rx->O_data, 1);
+        }
 };
 
 int main(int argc, char** argv, char** env) {
@@ -206,6 +248,7 @@ int main(int argc, char** argv, char** env) {
     bench->test_mult();
     bench->test_add();
     bench->test_irq();
+    bench->test_stack();
 
     printf("Success!\n");
 
