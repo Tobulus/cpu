@@ -44,16 +44,16 @@ not r2, r1
 ## Memory
 ### Memory read
 ```
-read.b r2, r1 # read one byte from adress in r1 into r2
+read.b r2, r1    # read one byte from adress in r1 into r2
 read.b r2, r1, 2 # read one byte from adress in r1 + 2 into r2
-read.w r2, r1 # read two byte from adress in r1 into r2
+read.w r2, r1    # read two byte from adress in r1 into r2
 read.w r2, r1, 2 # read two byte from adress in r1 + 2 into r2
 ```
 ### Memory write
 ```
-write.b r2, r1 # write one byte from r1 to the adress stored in r2
+write.b r2, r1    # write one byte from r1 to the adress stored in r2
 write.b r2, r1, 2 # write one byte from r1 to the adress stored in r2 + 2
-write.w r2, r1 # write two byte from r1 to the adress stored in r2
+write.w r2, r1    # write two byte from r1 to the adress stored in r2
 write.w r2, r1, 2 # write one byte from r1 to the adress stored in r2 + 2
 ```
 ## LOAD
@@ -97,4 +97,15 @@ br.bz r1, r2
 ## Save program counter
 ```
 spc r1
+```
+## Stack operations
+```
+push r1
+pop r1
+```
+## Interrupts
+```
+ei   # enable interrupts
+di   # disable interrupts
+reti # return from an interrup handler
 ```
