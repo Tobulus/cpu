@@ -1,3 +1,5 @@
 *.vcd
 *.swp
+*.pyc
+*.bin
 obj_dir/

@@ -64,20 +64,11 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
                 m_core->UART_rx_in_data = tx->O_data; 
             }
         }
-
-        void test_add() {
-            Vuart_tx* tx = new Vuart_tx;
-            Vuart_rx* rx = new Vuart_rx;
-
-            reset_uarts(tx, rx);
-            reset_system();
-
-            /* assemble the multiplication test program */
-            system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
-
+        
+        void flash_program(Vuart_tx* tx, std::string binary_path) {
             std::ifstream file;
             std::array<char, 1> bytes;
-            file.open("test/add.bin", std::ifstream::in | std::ios::binary);
+            file.open(binary_path, std::ifstream::in | std::ios::binary);
 
             /* read the binary test program and send it via the UART to the RAM */
             while (file.read(bytes.data(), bytes.size())) {
@@ -91,6 +82,19 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
             transfer_byte(tx, 0xFF);
             transfer_byte(tx, 0xFF);
+        }
+
+        void test_add() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
+
+            reset_uarts(tx, rx);
+            reset_system();
+
+            /* assemble the multiplication test program */
+            system("python3.8 ../../assembler/assembler.py --input test/add.asm --output test/add.bin");
+            
+            flash_program(tx, "test/add.bin");
 
             printf("wait for completion of test program...\n");
             fflush(stdout);
@@ -118,22 +122,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             /* assemble the multiplication test program */
             system("python3.8 ../../assembler/assembler.py --input test/mult.asm --output test/mult.bin");
 
-            std::ifstream file;
-            std::array<char, 1> bytes;
-            file.open("test/mult.bin", std::ifstream::in | std::ios::binary);
-
-            /* read the binary test program and send it via the UART to the RAM */
-            while (file.read(bytes.data(), bytes.size())) {
-                transfer_byte(tx, bytes.at(0));
-            }
-
-            file.close();
-
-            /* program is transfered - now tell the bootloader to jump to the
-             * beginning of the transfered executable by sending two times 0xFF */
-
-            transfer_byte(tx, 0xFF);
-            transfer_byte(tx, 0xFF);
+            flash_program(tx, "test/mult.bin");
 
             printf("wait for completion of test program...\n");
             fflush(stdout);
@@ -161,22 +150,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             /* assemble the irq test program */
             system("python3.8 ../../assembler/assembler.py --input test/irq.asm --output test/irq.bin");
 
-            std::ifstream file;
-            std::array<char, 1> bytes;
-            file.open("test/irq.bin", std::ifstream::in | std::ios::binary);
-
-            /* read the binary test program and send it via the UART to the RAM */
-            while (file.read(bytes.data(), bytes.size())) {
-                transfer_byte(tx, bytes.at(0));
-            }
-
-            file.close();
-
-            /* program is transfered - now tell the bootloader to jump to the
-             * beginning of the transfered executable by sending two times 0xFF */
-
-            transfer_byte(tx, 0xFF);
-            transfer_byte(tx, 0xFF);
+            flash_program(tx, "test/irq.bin");
 
             printf("wait for completion of test program...\n");
             fflush(stdout);
@@ -207,22 +181,7 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
             /* assemble the stack test program */
             system("python3.8 ../../assembler/assembler.py --input test/stack.asm --output test/stack.bin");
 
-            std::ifstream file;
-            std::array<char, 1> bytes;
-            file.open("test/stack.bin", std::ifstream::in | std::ios::binary);
-
-            /* read the binary test program and send it via the UART to the RAM */
-            while (file.read(bytes.data(), bytes.size())) {
-                transfer_byte(tx, bytes.at(0));
-            }
-
-            file.close();
-
-            /* program is transfered - now tell the bootloader to jump to the
-             * beginning of the transfered executable by sending two times 0xFF */
-
-            transfer_byte(tx, 0xFF);
-            transfer_byte(tx, 0xFF);
+            flash_program(tx, "test/stack.bin");
 
             printf("wait for completion of test program...\n");
             fflush(stdout);
