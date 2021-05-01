@@ -99,13 +99,15 @@ br.bz r1, r2
 spc r1
 ```
 ## Stack operations
+Currently expects that the stack pointer (SP) is set in r7. This is currently not configurable.
 ```
 push r1
 pop r1
 ```
 ## Interrupts
+Interrupts need a stack in RAM to save at least the program counter. The stack pointer is currently expected in r7, this needs to be set before enabling interrupts.
 ```
 ei   # enable interrupts
 di   # disable interrupts
-reti # return from an interrup handler
+reti # return from an interrupt handler
 ```
