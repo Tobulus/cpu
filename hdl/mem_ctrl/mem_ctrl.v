@@ -5,17 +5,17 @@ module mem_ctrl(input wire I_clk,
     input wire[1:0] I_size,
     input wire[15:0] I_addr, 
     input wire[15:0] I_data,
-    output reg[15:0] O_data, 
-    output wire O_data_ready,
-    output wire O_ready,
     input wire MEM_ready,
-    output wire MEM_exec,
-    output wire MEM_write,
+    input wire[15:0] MEM_data_in,
+    input wire MEM_data_ready,
+    output reg[15:0] O_data, 
+    output reg O_data_ready,
+    output reg O_ready,
+    output reg MEM_exec,
+    output reg MEM_write,
     output reg[15:0] MEM_addr,
     output reg[1:0] MEM_size,
-    output reg[15:0] MEM_data_out,
-    input wire[15:0] MEM_data_in,
-    input wire MEM_data_ready);
+    output reg[15:0] MEM_data_out);
 
 reg[1:0] state = 0;
 

@@ -1,7 +1,7 @@
 module pc(input wire I_clk,
     input wire I_reset,
     input wire I_enable,
-    input reg[15:0] I_in,
+    input wire[15:0] I_in,
     input wire I_write,
     output reg[15:0] O_out);
 

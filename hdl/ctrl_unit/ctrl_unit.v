@@ -3,7 +3,7 @@
 module ctrl_unit(input wire I_clk, 
     input wire I_reset,
     /* verilator lint_off UNUSED */
-    input reg[15:0] I_instruction,
+    input wire[15:0] I_instruction,
     input wire I_mem_ready,
     input wire I_data_ready,
     input wire I_irq_enabled,
