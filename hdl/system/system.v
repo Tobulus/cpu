@@ -1,3 +1,5 @@
+`include "mmap.vh"
+
 module system(input wire I_clk, 
     input wire I_reset,
     input wire UART_rx_in_data, 
@@ -10,7 +12,7 @@ wire[15:0] ram_data_in, bootrom_out, ram_data_out, mem_addr, mem_data_in, mem_da
 wire[7:0] UART_rx_out_data, UART_tx_in_data;
 reg[7:0] rx_data;
 wire[1:0] mem_size;
-reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, booting = 1, irq_enabled = 0;
+reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, irq_enabled = 0;
 reg[1:0] state = 0;
 
 core core(.I_clk(I_clk),
@@ -60,7 +62,6 @@ begin: device_observer
     // ordering of the signals defines the irq prio
     if (UART_rx_data_ready) begin
         rx_data_ready <= 1;
-        //TODO: remove, data should be fetched from irq handler
         rx_data <= UART_rx_out_data;
         irq_enabled <= 1;
     end
@@ -78,7 +79,6 @@ end
 always @(posedge I_clk) 
 begin: system
     if (I_reset == 1) begin
-        booting <= 1;
         mem_ready <= 1; 
         mem_data_ready <= 0;
         state <= 0;
@@ -89,8 +89,8 @@ begin: system
 
             if (mem_ready == 1 && mem_exec == 1) begin
                 mem_ready <= 0;
-                // UART data
-                if (mem_addr == 16'h400) begin
+                // UART1 data r/w
+                if (mem_addr == UART_1_RW) begin
                     if (mem_write == 1) begin
                         UART_tx_exec <= 1;
                         UART_tx_in_data <= mem_data_out[7:0];
@@ -102,27 +102,22 @@ begin: system
                         irq_enabled <= 0;
                     end
                 end
-                // UART rx data ready status
-                else if (mem_addr == 16'h401) begin
+                // UART1 rx data ready status
+                else if (mem_addr == UART_1_RX_DATA_READY) begin
                     mem_data_in[15:1] <= 0;
                     mem_data_in[0] <= rx_data_ready;
                     state <= 1;
                     rx_data_ready <= 0;
                 end
-                // UART tx ready status
-                else if (mem_addr == 16'h402) begin
+                // UART1 tx ready status
+                else if (mem_addr == UART_1_TX_READY) begin
                     mem_data_in[15:1] <= 0;
                     mem_data_in[0] <= UART_tx_ready;
                     state <= 1;
                 end
                 // RAM or bootrom
                 else begin
-                    // we are leaving the bootloader -> unmap it from memory
-                    if (booting == 1 && mem_write == 0 && mem_addr >= 16'h64) begin
-                        booting <= 0;
-                    end
-
-                    if (booting == 1 && mem_write == 0 && mem_addr < 16'h64) begin
+                    if (mem_write == 0 && mem_addr < APP) begin
                         bootrom_enable <= 1;
                     end
                     else begin
@@ -137,7 +132,7 @@ begin: system
         end
         else if (state == 2) begin
             state <= 3;
-            if (booting == 1 && mem_write == 0) begin
+            if (mem_write == 0 && mem_addr < APP) begin
                 bootrom_enable <= 0;
             end
             else begin
@@ -145,7 +140,7 @@ begin: system
             end
         end
         else if (state == 3) begin
-            if (booting == 1 && mem_write == 0) begin
+            if (mem_write == 0 && mem_addr < APP) begin
                 mem_data_in <= bootrom_out;
                 bootrom_enable <= 0; // TODO already disabled in 2?
             end

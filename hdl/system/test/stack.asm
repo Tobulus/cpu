@@ -1,7 +1,7 @@
 load.l r7, 0
-load.h r7, 8 # SP
-load.l r3, 0
-load.h r3, 4 # UART
+load.h r7, 127 # SP
+load.l r3, 254
+load.h r3, 127 # UART
 load.l r1, 1
 load.h r1, 0
 load.l r2, 5

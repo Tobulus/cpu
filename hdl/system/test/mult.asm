@@ -1,6 +1,6 @@
 # stack pointer
-load.l r7, 50
-load.h r7, 0
+load.l r7, 0
+load.h r7, 127
 # operand a
 load.l r1, 4
 load.h r1, 0
@@ -17,8 +17,8 @@ write.w r7, r3
 br $MULT
 add.u r7, r7, 4
 # uart-tx adress
-load.l r1, 0
-load.h r1, 4
+load.l r1, 254
+load.h r1, 127
 # send the result
 write.b r1, r0
 MULT:

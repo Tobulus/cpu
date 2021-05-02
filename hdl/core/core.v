@@ -1,4 +1,5 @@
 `include "../ctrl_unit/ctrl_states.vh"
+`include "../system/mmap.vh"
 
 module core(input wire I_clk, 
     input wire I_reset,
@@ -153,7 +154,7 @@ begin
         end
 
         if (state == ENTER_ISR) begin
-            pc_in = 16'h64 + irq_number * 2;
+            pc_in = APP + irq_number * 2;
             pc_write = 1;
         end
         else if (instruction[15:12] == SPECIAL && instruction[2:0] == 3'b100) begin

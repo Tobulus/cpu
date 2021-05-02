@@ -1,11 +1,11 @@
 load.l r0, 0
 load.l r6, 0
-load.l r1, 1
-load.h r1, 4
-load.l r7, 0
-load.h r7, 4
+load.l r1, 255
+load.h r1, 127 # UART1-rx-ready
+load.l r7, 254
+load.h r7, 127 # UART1-data
 load.l r4, 100
-load.h r4, 0
+load.h r4, 0 # Start of application
 UART_POLL:
 read.b r2, r1
 cmp r3, r2, r0
