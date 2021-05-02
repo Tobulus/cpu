@@ -13,6 +13,8 @@ module core(input wire I_clk,
     output reg[15:0] MEM_addr, 
     output reg[15:0] MEM_data_out);
 
+localparam PUSH_PC_INSTRUCTION = {STACK, 4'b1110, {3{1'b1}}, 5'b00001};
+
 wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, push_pc;
 wire write_rD, alu_pc_write, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode, irq_ack, alu_irq_enable;
 wire[1:0] rD_write_pos;
@@ -123,12 +125,12 @@ begin
     end
     else begin
         if (state == DECODE) begin
-            instruction = push_pc ? {STACK, 4'b1110, {3{1'b1}}, 5'b00001} : MEM_data_in;//TODO: mem_data_out;
+            instruction = push_pc ? PUSH_PC_INSTRUCTION : MEM_data_in;//TODO: mem_data_out;
         end
         decoder_enable = state == DECODE;
         register_enable = (state == REG_READ) || (state == REG_WRITE) || (state == DECREMENT_SP);
         alu_enable = state == EXEC;
-        mem_enable = (state == STORE) || state == (SAVE_PC);
+        mem_enable = (state == STORE) || (state == SAVE_PC);
         pc_enable = (state == REG_WRITE) || (state == ENTER_ISR);
         mem_data_in = (opcode == STACK && instruction[0] == 1) ? pc_out : rB_out;
         write_rD = ((state == REG_WRITE) && alu_write_rD) || (state == DECREMENT_SP);

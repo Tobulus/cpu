@@ -1,6 +1,21 @@
 `include "../alu/ops.vh"
 `include "ctrl_states.vh"
 
+`define CHECK_IRQ() if (I_irq_enabled && I_irq_active && irq_save_pc == 0) begin \
+                        // irq requested -> fetch irq number and save pc \
+                        O_irq_ack <= 1; \
+                        O_state <= FETCH_IRQ_NUM; \
+                    end \
+                    else if (irq_save_pc == 1) begin \
+                        // pc has been saved, now enter ISR \
+                        irq_save_pc <= 0; \
+                        O_push_pc <= 0; \
+                        O_state <= ENTER_ISR; \
+                    end \
+                    else begin \
+                        O_state <= FETCH; \
+                    end \
+
 module ctrl_unit(input wire I_clk, 
     input wire I_reset,
     /* verilator lint_off UNUSED */
@@ -86,27 +101,13 @@ begin: CTRL_UNIT
     end
     else if (O_state == REG_WRITE)
     begin
-        // register write state
         if (instr[15:12] == STACK && instr[8]) begin
             // POP instruction does two reg-writes: the value which was popped
             // from stack and the decrement of the SP
             O_state <= DECREMENT_SP;
         end
         else begin
-            if (I_irq_enabled && I_irq_active && irq_save_pc == 0) begin
-                // irq requested -> fetch irq number and save pc
-                O_irq_ack <= 1;
-                O_state <= FETCH_IRQ_NUM;
-            end
-            else if (irq_save_pc == 1) begin
-                // pc has been saved, now enter ISR
-                irq_save_pc <= 0;
-                O_push_pc <= 0;
-                O_state <= ENTER_ISR;
-            end
-            else begin
-                O_state <= FETCH;
-            end
+            `CHECK_IRQ()
         end
     end
     else if (O_state == FETCH_IRQ_NUM) begin
@@ -129,20 +130,7 @@ begin: CTRL_UNIT
         O_state <= FETCH;
     end
     else if (O_state == DECREMENT_SP) begin
-        if (I_irq_enabled && I_irq_active && irq_save_pc == 0) begin
-            // irq requested -> fetch irq number and save pc
-            O_irq_ack <= 1;
-            O_state <= FETCH_IRQ_NUM;
-        end
-        else if (irq_save_pc == 1) begin
-            // pc has been saved, now enter ISR
-            irq_save_pc <= 0;
-            O_push_pc <= 0;
-            O_state <= ENTER_ISR;
-        end
-        else begin
-            O_state <= FETCH;
-        end
+        `CHECK_IRQ()
     end
 end
 
