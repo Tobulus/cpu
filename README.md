@@ -12,3 +12,21 @@ This requires:
 The idea comes from the outlining in ['From the transistor'](https://github.com/geohot/fromthetransistor)
 
 As everyone should be able to try this out without buying expensive hardware like a FPGA we will use the great [Verilator](https://www.veripool.org/wiki/verilator) to simulate our hardware model.
+
+# Instruction set
+
+The available instructions and the binary format is defined [here](https://github.com/Tobulus/cpu/blob/main/opcode.txt).
+
+# Memory layout
+
+The relevant memory layout is visualized [here](https://github.com/Tobulus/cpu/blob/main/mmap.txt).
+This layout defines where the bootloader and application code is placed in RAM, where the stack starts to grow and where hardware devices are mapped into memory.
+
+# Assembler
+
+The assembler language definition can be found [here](https://github.com/Tobulus/cpu/tree/main/assembler).
+Usage examples (*.asm files) can be found in the [system-test](https://github.com/Tobulus/cpu/tree/main/hdl/system/test).
+
+# Bootloader
+
+A UART-bootloader is [available](https://github.com/Tobulus/cpu/tree/main/bootloader), which allows to send arbitrary programs into RAM and execute them.
