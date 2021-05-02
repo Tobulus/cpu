@@ -15,12 +15,12 @@ wire alu_enable, decoder_enable, register_enable, pc_enable, mem_enable, push_pc
 wire write_rD, alu_pc_write, pc_write, mem_ready, mem_execute, mem_write, mem_data_ready, alu_write_rD, mode, irq_ack, alu_irq_enable;
 wire[1:0] rD_write_pos;
 reg[1:0] memory_mode, memory_size, alu_memory_size;
-reg[2:0] rD_select, rA_select, rB_select;
+reg[2:0] reg_rD_select, rD_select, rA_select, rB_select;
 reg[3:0] opcode;
 reg[7:0] immediate;
 reg[15:0] irq_number, pc_out, pc_in, rA_out, rB_out, alu_out, register_in, instruction, mem_addr, mem_data_in, mem_data_out;
 /* verilator lint_off UNUSED */
-reg[8:0] state;
+reg[9:0] state;
 reg read_irq_number;
 
 alu alu(.I_clk(I_clk),
@@ -88,7 +88,7 @@ register register(.I_clk(I_clk),
     .I_reset(I_reset), 
     .I_enable(register_enable),
     .I_rD_write(write_rD),
-    .I_rD_select(rD_select),
+    .I_rD_select(reg_rD_select),
     .I_rD_write_pos(rD_write_pos),
     .I_rA_select(rA_select),
     .I_rB_select(rB_select),
@@ -125,13 +125,13 @@ begin
             instruction = push_pc ? {STACK, 4'b1110, {3{1'b1}}, 5'b00001} : MEM_data_in;//TODO: mem_data_out;
         end
         decoder_enable = state[1];
-        register_enable = state[2] || state[5];
+        register_enable = state[2] || state[5] || state[9];
         alu_enable = state[3];
         mem_enable = state[4] || state[7];
         // inc pc on reg write-back and write pc on ISR enter
         pc_enable = state[5] || state[8];
         mem_data_in = (opcode == STACK && instruction[0] == 1) ? pc_out : rB_out;
-        write_rD = state[5] && alu_write_rD;
+        write_rD = (state[5] && alu_write_rD) || state[9];
         memory_size = state[0] ? 2 : alu_memory_size;
         O_irq_ack = irq_ack;
         
@@ -141,6 +141,14 @@ begin
         end
         else begin
             mem_addr = mem_enable ? alu_out : pc_out;
+        end
+
+        // POP SP decrement
+        if (state[9]) begin
+            reg_rD_select = rA_select;
+        end
+        else begin
+            reg_rD_select = rD_select;
         end
 
         if (state[8]) begin
@@ -158,7 +166,7 @@ begin
             pc_write = alu_pc_write;
         end
 
-        if (memory_mode == MEM_READ) begin
+        if (memory_mode == MEM_READ && !state[9]) begin
             register_in = mem_data_out;
         end
         else begin
