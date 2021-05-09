@@ -4,7 +4,11 @@
     localparam RAM_SIZE  = 16'h8000;
 
     // Application
-    localparam APP       = 16'h64;
+    localparam APP       = 16'h0064;
+    
+    // Timer
+    localparam TIMER1_COUNT         = RAM_SIZE - 10;
+    localparam TIMER_ENABLE         = RAM_SIZE - 9;
 
     // UART1
     localparam UART_1_RW            = RAM_SIZE - 2;

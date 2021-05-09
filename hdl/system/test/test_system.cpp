@@ -197,6 +197,33 @@ class System_Test_Bench: public TESTBENCH<Vsystem> {
 
             ASSERT_EQ(rx->O_data, 1);
         }
+        
+        void test_timer() {
+            Vuart_tx* tx = new Vuart_tx;
+            Vuart_rx* rx = new Vuart_rx;
+
+            reset_uarts(tx, rx);
+            reset_system();
+
+            /* assemble the timer test program */
+            system("python3.8 ../../assembler/assembler.py --input test/timer.asm --output test/timer.bin");
+
+            flash_program(tx, "test/timer.bin");
+
+            printf("wait for completion of test program...\n");
+            fflush(stdout);
+
+            /* wait for the completion and check the result which was received via UART */
+            while (!rx->O_data_ready) {
+                rx_tick(rx);    
+                this->tick();
+                rx->I_data_bit = m_core->UART_tx_out_data;
+            }
+            
+            printf("Done.\n");
+
+            ASSERT_EQ(rx->O_data, 1);
+        }
 };
 
 int main(int argc, char** argv, char** env) {
@@ -208,6 +235,7 @@ int main(int argc, char** argv, char** env) {
     bench->test_add();
     bench->test_irq();
     bench->test_stack();
+    bench->test_timer();
 
     printf("Success!\n");
 

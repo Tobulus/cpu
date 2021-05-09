@@ -10,10 +10,11 @@ wire ram_enable, bootrom_enable, mem_exec, mem_write;
 wire UART_tx_ready, UART_rx_data_ready, UART_tx_exec, irq_ack;
 wire[15:0] ram_data_in, bootrom_out, ram_data_out, mem_addr, mem_data_in, mem_data_out;
 wire[7:0] UART_rx_out_data, UART_tx_in_data;
-reg[7:0] rx_data;
+reg[7:0] rx_data, timer_enable = 0, irq_num = 0;
 wire[1:0] mem_size;
-reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, irq_enabled = 0;
+reg mem_ready = 1, mem_data_ready = 0, rx_data_ready, buff_rx_data_ready, irq_enabled = 0;
 reg[1:0] state = 0;
+reg[15:0] timer1_count = 1, timer1_config = 0;
 
 core core(.I_clk(I_clk),
     .I_reset(I_reset),
@@ -58,21 +59,37 @@ uart_tx uart_tx(.I_clk(I_clk),
     .O_data(UART_tx_out_data));
 
 always@(posedge I_clk)
-begin: device_observer
+begin: irq_observer
+    //TODO: data race condition on irq_num
     // ordering of the signals defines the irq prio
     if (UART_rx_data_ready) begin
-        rx_data_ready <= 1;
-        rx_data <= UART_rx_out_data;
         irq_enabled <= 1;
+        irq_num <= 1;
+        buff_rx_data_ready <= 1;
+        rx_data <= UART_rx_out_data;
+    end
+    else if (timer1_count == 0) begin
+        irq_enabled <= 1;
+        irq_num <= 2;
     end
 
     if (irq_ack == 1) begin
-        if (rx_data_ready == 1) begin
-            irq_enabled <= 0;
-            mem_data_in[15:8] <= 0;
-            mem_data_in[7:0] <= 1; // irq-id
+        irq_enabled <= 0;
+        mem_data_in[15:8] <= 0;
+        mem_data_in[7:0] <= irq_num;
+        if (irq_num == 1) begin
             rx_data_ready <= 0;
+        end 
+        else if (irq_num == 2) begin
+            timer1_count <= timer1_config;
         end
+    end
+end
+
+always @(posedge I_clk)
+begin: timer
+    if ((timer_enable & 1) == 1 && timer1_count > 0) begin
+        timer1_count <= timer1_count - 1;
     end
 end
 
@@ -87,7 +104,11 @@ begin: system
         if (state == 0) begin
             mem_data_ready <= 0;
 
-            if (mem_ready == 1 && mem_exec == 1) begin
+            if (mem_exec == 0 && !UART_rx_data_ready && buff_rx_data_ready) begin
+                rx_data_ready <= buff_rx_data_ready;
+                buff_rx_data_ready <= 0;
+            end
+            else if (mem_ready == 1 && mem_exec == 1) begin
                 mem_ready <= 0;
                 // UART1 data r/w
                 if (mem_addr == UART_1_RW) begin
@@ -113,6 +134,24 @@ begin: system
                 else if (mem_addr == UART_1_TX_READY) begin
                     mem_data_in[15:1] <= 0;
                     mem_data_in[0] <= UART_tx_ready;
+                    state <= 1;
+                end
+                // TIMER enable
+                else if (mem_addr == TIMER_ENABLE) begin
+                    if (mem_write == 1) begin
+                        timer_enable <= mem_data_out[7:0];
+                    end
+                    state <= 1;
+                end
+                // TIMER1 count
+                else if (mem_addr == TIMER1_COUNT) begin
+                    if (mem_write == 1) begin
+                        timer1_config <= mem_data_out;
+                        timer1_count <= mem_data_out;
+                    end 
+                    else begin
+                        mem_data_in <= timer1_count;
+                    end
                     state <= 1;
                 end
                 // RAM or bootrom
@@ -142,13 +181,11 @@ begin: system
         else if (state == 3) begin
             if (mem_write == 0 && mem_addr < APP) begin
                 mem_data_in <= bootrom_out;
-                bootrom_enable <= 0; // TODO already disabled in 2?
             end
             else begin
                 if (mem_write == 0) begin
                     mem_data_in <= ram_data_out;
                 end
-                ram_enable <= 0; // TODO already disabled in 2?
             end
             mem_ready <= 1;
             mem_data_ready <= 1;
