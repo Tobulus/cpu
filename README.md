@@ -30,3 +30,13 @@ Usage examples (*.asm files) can be found in the [system-test](https://github.co
 # Bootloader
 
 A UART-bootloader is [available](https://github.com/Tobulus/cpu/tree/main/bootloader), which allows to send arbitrary programs into RAM and execute them.
+
+# Interrupts
+
+The hardware uses a [IVT](https://en.wikipedia.org/wiki/Interrupt_vector_table) to handle interrupt handlers which must located at the beginning of the application code. See [timer.asm](https://github.com/Tobulus/cpu/blob/main/hdl/system/test/timer.asm) or [irq.asm](https://github.com/Tobulus/cpu/blob/main/hdl/system/test/irq.asm) for examples.
+
+| Offset        | Handler  |
+| ------------- | -----|
+| 0x0           | Reset |
+| 0x2           | UART1 |
+| 0x4           | Timer1|
